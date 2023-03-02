@@ -28,8 +28,12 @@ DataEN$`Age Group` <- ifelse(DataEN$`Age Group` == "neonate", "N",
                              ifelse(DataEN$`Age Group` == "juvenile", "J",
                                     ifelse(DataEN$`Age Group` == "subadult", "S",
                                           ifelse(DataEN$`Age Group` == "adult", "A", DataEN$`Age Group`))))
+#Change age group to factor
+DataEN$`Age Group` <-as.factor(DataEN$`Age Group`)
 
-View(DataEN)
+#Round op numbers to 2 decimals
+DataEN$`BT Average` <- round(DataEN$`BT Average`, 2)
+
 
 #Change Findings to Death category
 for (i in 1:nrow(DataEN)) {
@@ -61,11 +65,27 @@ for (i in 1:nrow(DataEN)) {
     DataEN$`Death category`[i] <- "Other"
 }
 
-# Reassign Starvation category to Emaciation for Age Group J and A
-DataEN$`Death category` <- ifelse(DataEN$`Age Group` %in% c("J", "A") & DataEN$`Death category` == "Starvation",
-                                  ifelse(DataEN$`BT Average` < 15, "Emaciation", "Starvation"),
-                                  DataEN$`Death category`)
+#Reassign death category for neonate porpoises - this one works!
+DataEN$`Death category`[DataEN$`Age Group` == "N" & DataEN$`Death category` == "Starvation"] <- "Perinatal"
 
+#Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
+#Model residuals for juveniles and adults separately
+juvenile_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataEN, `Age Group` == "J"))
+juvenile_resid <- residuals(juvenile_lm)
+
+adult_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataEN, `Age Group` == "A"))
+adult_resid <- residuals(adult_lm)
+
+#Classify death category based on residual sign for juveniles
+juv_idx <- which(DataEN$`Age Group` == "J" & DataEN$`Death category` == "Starvation")
+DataEN$`Death category`[juv_idx] <- ifelse(juvenile_resid[juv_idx] > 0, "Starvation", "Emaciation")
+
+#Classify death category based on residual sign for adults
+ad_idx <- which(DataEN$`Age Group` == "A" & DataEN$`Death category` == "Starvation")
+DataEN$`Death category`[ad_idx] <- ifelse(adult_resid[ad_idx] > 0, "Starvation", "Emaciation")
+
+#Update remaining NA values to "Starvation/Emaciation"
+DataEN$`Death category`[is.na(DataEN$`Death category`)] <- "Starvation/Emaciation"
 View(DataEN)
 
 #Change to Death category to factor - only AFTER reassigning! Otherwise won't work!

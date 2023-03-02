@@ -6,6 +6,7 @@ library(readxl) #To import Excel files
 DataSL <- read_excel("DataSL.xlsx")
 View(DataSL)
 
+
 #Define the mapping between Composition code and DCC
 mapping <- c("freshly dead- died on beach (code 2a)" = 1,
              "freshly dead (code 2a)" = 1,
@@ -26,6 +27,11 @@ DataSL <- DataSL[!DataSL$DCC %in% c(4, 5), ]
 DataSL$`Age Group` <- ifelse(DataSL$`Age Group` == "neonate", "N", 
                        ifelse(DataSL$`Age Group` == "juvenile", "J", 
                               ifelse(DataSL$`Age Group` == "adult", "A", DataSL$`Age Group`)))
+#Change age group to factor
+DataSL$`Age Group` <-as.factor(DataSL$`Age Group`)
+
+#Round op numbers to 2 decimals
+DataSL$`BT Average` <- round(DataSL$`BT Average`, 2)
 
 View(DataSL)
 
@@ -54,54 +60,32 @@ for (i in 1:nrow(DataSL)) {
 
 View(DataSL)
 
-# Subset the data to only include cases of starvation
-DataSL_starvation <- subset(DataSL, `Death category` == "Starvation")
 
-# Create a new variable called "cause_of_death" based on the difference between observed and predicted blubber thickness
-DataSL_starvation$cause_of_death <- ifelse(resid(lm(`BT Average` ~ `Age Group`, data = DataSL_starvation)) > 0, "Starvation", "Emaciation")
+#Reassign death category for neonate porpoises - this one works!
+DataSL$`Death category`[DataSL$`Age Group` == "N" & DataSL$`Death category` == "Starvation"] <- "Perinatal"
 
-# Subset the data to only include cases of perinatal death
-DataSL_perinatal <- subset(DataSL, `Age Group`== "N")
+#Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
+#Model residuals for juveniles and adults separately
+juvenile_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataSL, `Age Group` == "J"))
+juvenile_resid <- residuals(juvenile_lm)
 
-# Assign the Death category "Perinatal" to the perinatal cases
-DataSL_perinatal$`Death category` <- "Perinatal"
+adult_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataSL, `Age Group` == "A"))
+adult_resid <- residuals(adult_lm)
 
-# Merge the two subsets back into the original dataframe
-DataSL$`Death category` <- rbind(DataSL_starvation, DataSL_perinatal)
+#Classify death category based on residual sign for juveniles
+juv_idx <- which(DataSL$`Age Group` == "J" & DataSL$`Death category` == "Starvation")
+DataSL$`Death category`[juv_idx] <- ifelse(juvenile_resid[juv_idx] > 0, "Starvation", "Emaciation")
 
-# Remove the "cause_of_death" column if it already exists
-if ("cause_of_death" %in% names(DataSL)) {
-  DataSL$cause_of_death <- NULL
-}
+#Classify death category based on residual sign for adults
+ad_idx <- which(DataSL$`Age Group` == "A" & DataSL$`Death category` == "Starvation")
+DataSL$`Death category`[ad_idx] <- ifelse(adult_resid[ad_idx] > 0, "Starvation", "Emaciation")
 
-# Merge the cause_of_death column back into the original dataframe
-DataSL <- merge(DataSL, DataSL_starvation[, c("Sample.ID", "cause_of_death")], by = "Sample.ID", all.x = TRUE)
+#Update remaining NA values to "Starvation/Emaciation"
+DataSL$`Death category`[is.na(DataSL$`Death category`)] <- "Starvation/Emaciation"
 
-
-
-
-
-#Reassign Death categories based on specific criteria
-#If Ageclass is "N" and Death category is "Starvation", new category is "Perinatal"
-#For porpoises in Ageclass "J" and "A" with Death category "Starvation":
-#BT Average below 15 is reassigned to "Emaciation"
-#BT Average above 15 stays assigned to "Starvation"
-
-DataSL$`Death category` <- ifelse(DataSL$`Age Group` == "N" & DataSL$`Death category` == "Starvation", "Perinatal",
-                                  ifelse(DataSL$`Age Group` %in% c("J", "A") & DataSL$`Death category` == "Starvation",
-                                         ifelse(DataSL$`BT Average` < 15, "Emaciation", "Starvation"),
-                                         DataSL$`Death category`))
-
-
-# Reassign Starvation category to Emaciation or Perinatal
-DataSL$`Death category` <- ifelse(DataSL$`Age Group` == "N" & DataSL$`Death category` == "Starvation", "Perinatal",
-                                  ifelse(DataSL$`Age Group` %in% c("J", "A") & DataSL$`Death category` == "Starvation",
-                                       ifelse(DataSL$`BT Average` < 15, "Emaciation", "Starvation"),
-                                       DataSL$`Death category`))
-
-
-#Change to Death category to factor - only AFTER reassigning! Otherwise won't work!
+#Change to factor - only AFTER reassigning! Otherwise won't work!
 DataSL$`Death category` <- as.factor(DataSL$`Death category`)
 summary(DataSL$`Death category`)
 
-View(DataSL)
+
+
