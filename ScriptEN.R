@@ -21,7 +21,7 @@ DataEN <- DataEN %>%
   mutate(DCC = recode(`Composition code`, !!!mapping))
 
 #Remove DCC 4 and 5
-DataSL <- DataSL[!DataSL$DCC %in% c(4, 5), ]
+DataEN <- DataEN[!DataEN$DCC %in% c(4, 5), ]
 
 #Reassign categories and store back in "Age Group"
 DataEN$`Age Group` <- ifelse(DataEN$`Age Group` == "neonate", "N", 
