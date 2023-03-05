@@ -16,6 +16,7 @@ data_merged$Country <- as.factor(data_merged$Country)
 #Convert month to an ordered factor variable
 data_merged$Month <- factor(data_merged$Month, levels = 1:12, ordered = TRUE)
 
+##Merge sea surface temperature data
 # Create a new column called "SST"
 data_merged$SST <- NA
 
