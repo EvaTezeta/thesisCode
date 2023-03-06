@@ -3,6 +3,7 @@ library(dplyr) #For pipes
 library(knitr) #For tables
 library(tidyr) #For pivot_wider()
 library(ggplot2) #For graphs
+library(gridExtra)
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -177,4 +178,109 @@ ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Country, color = 
   scale_color_discrete(name = "Country") +
   scale_y_continuous(limits = c(10, 22.5), breaks = seq(10, 22.5, by = 2))
 
+
+##Plot for monthly BT Average per sex and country
+#Create list to store the plots
+plot_list1 <- list()
+
+# Define color palette
+my_colors <- c("#E69F00", "#56B4E9")
+
+# Create three separate plots, one for each country
+for (i in unique(data_merged$Country)) {
+  
+# Subset the data for the current country
+country_data <- subset(data_merged, Country == i)
+
+# Calculate the average blubber thickness for each month, sex, and country
+avg_bt <- aggregate(`BT Average` ~ Month + Sex, data = country_data, FUN = mean)
+
+# Plot the average blubber thickness over time for each sex as a separate line
+p <- ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+  geom_line() +
+  scale_color_manual(values = my_colors) +
+  labs(x = "Month", y = "Average Blubber Thickness (mm)", title = i) +
+  theme_minimal()
+
+#Add plots to list
+plot_list1[[i]] <- (p)
+
+}
+
+#Arrange plots into grid
+grid.arrange(grobs = plot_list1, ncol = 3)
+
+
+##Plot for monthly BT Average per age group and country
+#Create list to store the plots
+plot_list2 <- list()
+
+# Create three separate plots, one for each country
+for (i in unique(data_merged$Country)) {
+
+# Subset the data for the current country
+country_data <- subset(data_merged, Country == i)
+
+# Calculate the average blubber thickness for each month, sex, and country
+avg_bt_age <- aggregate(`BT Average` ~ Month + `Age Group`, data = country_data, FUN = mean)
+
+# Create separate plots for each country
+age <- ggplot(data = avg_bt_age, aes(x = Month, y = `BT Average`, group = `Age Group`, color = `Age Group`)) +
+  geom_line() +
+  labs(x = "Month", y = "Average blubber thickness (mm)", title = i) +
+  scale_color_manual(values = c("red", "blue", "green", "purple")) +
+  theme_bw()
+
+#Add plot to plot list
+plot_list2[[i]] <- (age)
+}
+
+#Arrange plots into grid
+grid.arrange(grobs = plot_list2, ncol = 3)
+
+
+##Surface:volume ratio between juveniles and adults
+#Filter to only include juveniles and adults
+data_merged <- data_merged %>%
+  filter(`Age Group` %in% c("J", "A"))
+
+# Subset the data for juvenile and adult porpoises
+juvenile_data <- subset(data_merged, `Age Group` == "J")
+adult_data <- subset(data_merged, `Age Group` == "A")
+
+# Add Age Group column to the data frames
+juvenile_data <- mutate(juvenile_data, Age_Group = "Juvenile")
+adult_data <- mutate(adult_data, Age_Group = "Adult")
+
+# Combine the data frames
+boxplot_data <- rbind(juvenile_data, adult_data)
+
+# Calculate the mean BT Average and Weight for each age group
+juvenile_mean <- mean(juvenile_data$`BT Average`)
+adult_mean <- mean(adult_data$`BT Average`)
+juvenile_weight_mean <- mean(juvenile_data$`Body weight`)
+adult_weight_mean <- mean(adult_data$`Body weight`)
+
+# Calculate the surface:volume ratio for each age group
+juvenile_ratio <- juvenile_mean / juvenile_weight_mean
+adult_ratio <- adult_mean / adult_weight_mean
+
+# Print the ratios
+cat("Juvenile surface:volume ratio:", juvenile_ratio, "\n")
+cat("Adult surface:volume ratio:", adult_ratio, "\n")
+
+# Create a boxplot to visualize the distribution of BT Average and Weight for each age group
+boxplot_data <- data.frame(Age_Group = c(rep("Juvenile", nrow(juvenile_data)), rep("Adult", nrow(adult_data))),
+                           BT.Average = c(juvenile_data$`BT Average`, adult_data$`BT Average`),
+                           Weight = c(juvenile_data$`Body weight`, adult_data$`Body weight`))
+
+ggplot(data = boxplot_data, aes(x = Age_Group, y = BT.Average)) +
+  geom_boxplot() +
+  labs(x = "Age Group", y = "BT Average") +
+  ggtitle("Distribution of BT Average by Age Group")
+
+ggplot(data = boxplot_data, aes(x = Age_Group, y = Weight)) +
+  geom_boxplot() +
+  labs(x = "Age Group", y = "Weight") +
+  ggtitle("Distribution of Weight by Age Group")
 
