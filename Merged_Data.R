@@ -104,6 +104,15 @@ death_table <- data_merged %>%
 
 print(death_table)
 
+# Calculate the BT average per Death category and Country
+BT_table <- data_merged %>%
+  group_by(`Death category`, `Country`) %>%
+  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
+  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
+
+# Create a table showing BT average per Death category and Country
+kable(BT_table, caption = "BT average per death category and country")
+
 ##Plots for data exploration
 
 #Histogram of year divided by country

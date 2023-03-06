@@ -16,7 +16,6 @@ DataNL$`WGS84-Lon` <- as.numeric(DataNL$`WGS84-Lon`)
 #Round op numbers to 2 decimals
 DataNL$`BT Average` <- round(DataNL$`BT Average`, 2)
 DataNL$`Body weight` <- round(DataNL$`Body weight`, 2)
-View(DataNL)
 
 # Change Findings to Death category
 for (i in 1:nrow(DataNL)) {
@@ -47,6 +46,10 @@ for (i in 1:nrow(DataNL)) {
   else if (DataNL$Findings[i] == "Dystocia")
     DataNL$`Death category`[i] <- "Other"
 }
+
+#Reassign death category for neonate porpoises - this one works!
+DataNL$`Death category`[DataNL$`Age Group` == "N" & DataNL$`Death category` == "Starvation"] <- "Perinatal"
+DataNL$`Death category`[DataNL$`Age Group` == "N" & DataNL$`Death category` == "Emaciation"] <- "Perinatal"
 
 #Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
 
