@@ -357,4 +357,27 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
+##Nutritional condition index
+# Convert blubber thickness from mm to cm
+data_merged$`Blubber Thickness` <- data_merged$`BT Average` / 10
 
+# Calculate length squared
+data_merged$`Length Squared` <- data_merged$`Length`^2
+
+# Calculate mass/length squared
+data_merged$`Mass/Length2` <- data_merged$`Body weight` / data_merged$`Length Squared`
+
+# Calculate the nutritional condition index using blubber thickness and mass/length squared
+data_merged$NCI <- data_merged$`Blubber Thickness` * data_merged$`Mass/Length2`
+
+# Define the different levels of nutritional condition based on Koopman et al. (2002) and additional breakpoints
+nutritional_condition_levels <- cut(
+  data_merged$NCI, 
+  breaks = c(-Inf, 0.04, 0.086, 0.156, 0.21, Inf), 
+  labels = c("Very Poor", "Poor", "Normal", "Good", "Very Good")
+)
+
+# Add nutritional condition level to the data frame
+data_merged$NCI <- nutritional_condition_levels
+
+View(data_merged)
