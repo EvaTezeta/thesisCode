@@ -238,6 +238,36 @@ plot_list2[[i]] <- (age)
 #Arrange plots into grid
 grid.arrange(grobs = plot_list2, ncol = 3)
 
+## Plots of BT per death category
+# Create list to store the plots
+plot_list3 <- list()
+
+# Define color palette
+my_colors <- c("#E69F00", "#56B4E9")
+
+# Create nine separate plots, one for each death category
+for (i in unique(data_merged$`Death category`)) {
+
+# Subset the data for the current category
+category_data <- subset(data_merged, `Death category` == i)
+
+# Calculate the average number of deaths for each month and sex within the category
+avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+
+# Plot the average number of deaths over time for each sex as a separate line
+death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+  geom_line() +
+  scale_color_manual(values = my_colors) +
+  labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+  theme_minimal()
+
+# Add plot to list
+plot_list3[[i]] <- death_bt
+}
+
+# Arrange plots into a 3x3 grid
+grid.arrange(grobs = plot_list3, ncol = 3)
+
 
 ##Surface:volume ratio between juveniles and adults
 #Filter to only include juveniles and adults
@@ -283,4 +313,48 @@ ggplot(data = boxplot_data, aes(x = Age_Group, y = Weight)) +
   geom_boxplot() +
   labs(x = "Age Group", y = "Weight") +
   ggtitle("Distribution of Weight by Age Group")
+
+#Filter to include only males and females
+data_merged <- data_merged %>%
+  filter(Sex %in% c("M", "F"))
+
+#Subset data for male and female porpoises
+male_data <- subset(data_merged, Sex == "M")
+female_data <- subset(data_merged, Sex == "F")
+
+#Add Sex column to dataframes
+male_data <- mutate(male_data, Sex_Group = "Male")
+female_data <- mutate(female_data, Sex_Group = "Female")
+
+#Combine dataframes
+boxplot_data_sex <- rbind(male_data, female_data)
+
+#Calculate the mean BT Average and Weight for each sex group
+male_mean <- mean(male_data$`BT Average`)
+female_mean <- mean(female_data$`BT Average`)
+male_weight_mean <- mean(male_data$`Body weight`)
+female_weight_mean <- mean(female_data$`Body weight`)
+
+#Calculate the surface:volume ratio for each sex group and print it
+male_ratio <- male_mean / male_weight_mean
+female_ratio <- female_mean / female_weight_mean
+
+cat("Male surface:volume ratio:", male_ratio, "\n")
+cat("Female surface:volume ratio:", female_ratio, "\n")
+
+#Create a boxplot to visualize the distribution of BT Average and Weight for each sex group
+boxplot_data_sex <- data.frame(Sex_Group = c(rep("Male", nrow(male_data)), rep("Female", nrow(female_data))),
+                           BT.Average = c(male_data$`BT Average`, female_data$`BT Average`),
+                           Weight = c(male_data$`Body weight`, female_data$`Body weight`))
+
+ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = BT.Average)) +
+  geom_boxplot() +
+  labs(x = "Sex Group", y = "BT Average") +
+  ggtitle("Distribution of BT Average by Sex Group")
+
+ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
+  geom_boxplot() +
+  labs(x = "Sex Group", y = "Weight") +
+  ggtitle("Distribution of Weight by Sex Group")
+
 
