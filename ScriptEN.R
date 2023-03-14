@@ -26,7 +26,7 @@ DataEN <- DataEN[!DataEN$DCC %in% c(4, 5), ]
 #Reassign categories and store back in "Age Group"
 DataEN$`Age Group` <- ifelse(DataEN$`Age Group` == "neonate", "N", 
                              ifelse(DataEN$`Age Group` == "juvenile", "J",
-                                    ifelse(DataEN$`Age Group` == "subadult", "S",
+                                    ifelse(DataEN$`Age Group` == "subadult", "J",
                                           ifelse(DataEN$`Age Group` == "adult", "A", DataEN$`Age Group`))))
 #Change age group to factor
 DataEN$`Age Group` <-as.factor(DataEN$`Age Group`)

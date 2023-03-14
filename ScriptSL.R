@@ -25,8 +25,9 @@ DataSL <- DataSL[!DataSL$DCC %in% c(4, 5), ]
 
 #Reassign categories and store back in "Age Group"
 DataSL$`Age Group` <- ifelse(DataSL$`Age Group` == "neonate", "N", 
-                       ifelse(DataSL$`Age Group` == "juvenile", "J", 
-                              ifelse(DataSL$`Age Group` == "adult", "A", DataSL$`Age Group`)))
+                          ifelse(DataSL$`Age Group` == "juvenile", "J", 
+                              ifelse(DataSL$`Age Group` == "subadult", "J", 
+                                  ifelse(DataSL$`Age Group` == "adult", "A", DataSL$`Age Group`))))
 #Change age group to factor
 DataSL$`Age Group` <-as.factor(DataSL$`Age Group`)
 
