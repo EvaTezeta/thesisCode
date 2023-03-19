@@ -44,6 +44,12 @@ ggplot(data = north_sst_avg, aes(x = year, y = avg_temp)) +
   ggtitle("Average sea surface temperature in the northern North Sea by year") +
   xlab("Year") + ylab("Sea surface temperature (°C)")
 
+# Calculate average SST by year for north_sst
+south_sst_avg <- south_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
+
+# Calculate trendline for north_sst
+south_sst_trend <- lm(avg_temp ~ year, data = south_sst_avg)
+
 # Create plot for south_sst with trendline equation
 ggplot(data = south_sst_avg, aes(x = year, y = avg_temp)) +
   geom_point() +
