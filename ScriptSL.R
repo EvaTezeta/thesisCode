@@ -64,13 +64,46 @@ View(DataSL)
 
 #Reassign death category for neonate porpoises - this one works!
 DataSL$`Death category`[DataSL$`Age Group` == "N" & DataSL$`Death category` == "Starvation"] <- "Perinatal"
+  
+# Subset the data for Age Group A and J separately where Death category is Starvation
+DataSL_A <- subset(DataSL, `Age Group` == "A" & `Death category` == "Starvation")
+DataSL_J <- subset(DataSL, `Age Group` == "J" & `Death category` == "Starvation")
 
-#Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
+# Define a linear model using Body weight as predictor and Length as outcome
+model_A <- lm(Length ~ `Body weight`, data = DataSL_A)
+model_J <- lm(Length ~ `Body weight`, data = DataSL_J)
+
+# Predict the Length based on the model
+DataSL_A$predicted_length <- predict(model_A)
+DataSL_J$predicted_length <- predict(model_J)
+
+# Calculate the residuals
+DataSL_A$residuals <- DataSL_A$predicted_length - DataSL_A$Length
+DataSL_J$residuals <- DataSL_J$predicted_length - DataSL_J$Length
+
+# Reassign the Death category based on the residuals
+DataSL_A$`Death category`[DataSL_A$residuals > 0] <- "Starvation"
+DataSL_A$`Death category`[DataSL_A$residuals <= 0] <- "Emaciation"
+DataSL_J$`Death category`[DataSL_J$residuals > 0] <- "Starvation"
+DataSL_J$`Death category`[DataSL_J$residuals <= 0] <- "Emaciation"
+
+# Combine the modified Age Group A and J dataframes back into DataSL
+DataSL <- rbind(
+  DataSL,
+  DataSL_A[DataSL_A$`Death category` == "Emaciation", ],
+  DataSL_J[DataSL_J$`Death category` == "Emaciation", ]
+)
+
+View(DataSL)
+
+
+
+#Residuals of LM reassign into correct Death Category for starvation/emaciation
 #Model residuals for juveniles and adults separately
-juvenile_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataSL, `Age Group` == "J"))
+juvenile_lm <- lm(`Body weight` ~ `BT Average`+ Length, data = subset(DataSL, `Age Group` == "J"))
 juvenile_resid <- residuals(juvenile_lm)
 
-adult_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataSL, `Age Group` == "A"))
+adult_lm <- lm(`Body weight` ~ `BT Average`+ Length, data = subset(DataSL, `Age Group` == "A"))
 adult_resid <- residuals(adult_lm)
 
 #Classify death category based on residual sign for juveniles
@@ -88,5 +121,13 @@ DataSL$`Death category`[is.na(DataSL$`Death category`)] <- "Starvation/Emaciatio
 DataSL$`Death category` <- as.factor(DataSL$`Death category`)
 summary(DataSL$`Death category`)
 
+# Calculate the BT average per Death category and Country
+BT_table <- DataSL %>%
+  group_by(`Death category`, `Country`) %>%
+  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
+  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
+
+# Create a table showing BT average per Death category and Country
+kable(BT_table, caption = "BT average per death category and country")
 
 

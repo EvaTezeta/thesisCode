@@ -351,7 +351,7 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
 
 # Create a line plot of the mean BT Average over time for each country
 ggplot(mean_bt, aes(x = Year, y = `BT Average`)) +
-  geom_line(size = 1) +
+  geom_line(size = 0.6) +
   xlab("Year") +
   ylab("Mean BT Average") +
   ggtitle("Mean BT Average Over Time by Country") +
