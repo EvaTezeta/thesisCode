@@ -347,77 +347,100 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
+###
 
-library(ggplot2)
-library(gridExtra)
+# Create a line plot of the mean BT Average over time for each country
+ggplot(mean_bt, aes(x = Year, y = `BT Average`)) +
+  geom_line(size = 1) +
+  xlab("Year") +
+  ylab("Mean BT Average") +
+  ggtitle("Mean BT Average Over Time by Country") +
+  facet_wrap(~ Country, ncol = 3)
 
-# Subset data for Netherlands
-netherlands_data <- subset(data_merged, Country == "Netherlands")
+# Calculate the mean BT Average for each year and country
+mean_bt <- aggregate(`BT Average` ~ Year + Country, data_merged, mean)
 
-# Subset data for Scotland
-scotland_data <- subset(data_merged, Country == "Scotland")
+# Line plot for the Netherlands with x-axis labels every 2 years
+ggplot(mean_bt %>% filter(Country == "Netherlands"), 
+       aes(x = Year, y = `BT Average`)) +
+  geom_line(size = 0.8) +
+  scale_x_continuous(breaks = seq(2008, 2021, 2)) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages (mm)") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in the Netherlands")
 
-# Subset data for England
-england_data <- subset(data_merged, Country == "England")
+# Line plot for Scotland with x-axis labels every 2 years
+ggplot(mean_bt %>% filter(Country == "Scotland"), 
+       aes(x = Year, y = `BT Average`)) +
+  geom_line(size = 0.8) +
+  scale_x_continuous(breaks = seq(1992, 2022, 5)) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages (mm)") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in Scotland")
 
-# Define colors for the plots
-my_colors <- c("#006699", "#FF6600")
+# Line plot for England with x-axis labels every 2 years
+ggplot(mean_bt %>% filter(Country == "England"), 
+       aes(x = Year, y = `BT Average`)) +
+  geom_line(size = 0.8) +
+  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages (mm)") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in England")
 
-# Create a list to store the plots
-plot_list <- list()
+## This one works, but no righter y axis values yet
+# Calculate the average sea surface temperature per year from south_sst dataframe
+avg_sst_south <- south_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
 
-# Create nine separate plots, one for each death category
-for (i in unique(data_merged$`Death category`)) {
+# Line plot for England with x-axis labels every 2 years and sea surface temperature line
+ggplot(mean_bt %>% filter(Country == "England"), 
+       aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
+  geom_line(size = 0.8) +
+  geom_line(data = avg_sst_south, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
+  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
+  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
+  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
+                                         breaks = seq(8, 12, 0.5))) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages in mm") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in England") +
+  labs(color = "Legend") +
+  theme_bw()
 
-# Subset the data for the current category for Netherlands
-category_data_netherlands <- subset(netherlands_data, `Death category` == i)
+# Filter mean_bt for the Netherlands starting from 2008
+mean_bt_nl <- mean_bt %>% filter(Country == "Netherlands" & Year >= 2008)
 
-# Subset the data for the current category for Scotland
-category_data_scotland <- subset(scotland_data, `Death category` == i)
+# Calculate the average sea surface temperature per year from south_sst dataframe for years >= 2008
+avg_sst_south <- south_sst %>% filter(year >= 2008) %>% group_by(year) %>% summarize(avg_temp = mean(temp))
 
-# Subset the data for the current category for England
-category_data_england <- subset(england_data, `Death category` == i)
+# Line plot for the Netherlands with x-axis labels every 2 years and sea surface temperature line
+ggplot(mean_bt_nl, aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
+  geom_line(size = 0.8) +
+  geom_line(data = avg_sst_south, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
+  scale_x_continuous(breaks = seq(2008, 2020, 2)) +
+  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
+  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
+                                         breaks = seq(8, 12, 0.5))) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages in mm") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in the Netherlands") +
+  labs(color = "Legend") +
+  theme_bw()
 
-# Calculate the average number of deaths for each year for Netherlands
-avg_deaths_bt_netherlands <- aggregate(`BT Average` ~ Year, data = category_data_netherlands, FUN = mean)
-avg_temp_netherlands <- aggregate(south_sst ~ year, data = south_sst, FUN = mean)
+# Calculate the average sea surface temperature per year from south_sst dataframe
+avg_sst_north <- north_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
 
-# Calculate the average number of deaths for each year for Scotland
-avg_deaths_bt_scotland <- aggregate(`BT Average` ~ Year, data = category_data_scotland, FUN = mean)
-avg_temp_scotland <- aggregate(north_sst ~ year, data = north_sst, FUN = mean)
+# Line plot for Scotland with x-axis labels every 2 years and sea surface temperature line
+ggplot(mean_bt %>% filter(Country == "Scotland"), 
+       aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
+  geom_line(size = 0.8) +
+  geom_line(data = avg_sst_north, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
+  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
+  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
+  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
+                                         breaks = seq(8, 12, 0.5))) +
+  xlab("Year") +
+  ylab("Mean Blubber Thickness Averages in mm") +
+  ggtitle("Mean Blubber Thickness Averages Over Time in Scotland") +
+  labs(color = "Legend") +
+  theme_bw()
 
-# Calculate the average number of deaths for each year for England
-avg_deaths_bt_england <- aggregate(`BT Average` ~ Year, data = category_data_england, FUN = mean)
-avg_temp_england <- aggregate(south_sst ~ year, data = south_sst, FUN = mean)
-
-# Create plot for Netherlands
-plot_netherlands <- ggplot() +
-  geom_line(data = avg_deaths_bt_netherlands, aes(x = Year, y = `BT Average`, color = "Blubber Thickness"), size = 1.5) +
-  scale_color_manual(values = my_colors) +
-  labs(x = "Year", y = "Average Blubber Thickness", title = i) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  scale_y_continuous(sec.axis = sec_axis(~ ., name = "Average Sea Surface Temperature", breaks = round(seq(min(avg_temp_netherlands$south_sst), max(avg_temp_netherlands$south_sst), by = 0.5),1)))
-
-# Create plot for Scotland
-plot_scotland <- ggplot() +
-  geom_line(data = avg_deaths_bt_scotland, aes(x = Year, y = `BT Average`, color = "Blubber Thickness"), size = 1.5) +
-  scale_color_manual(values = my_colors) +
-  labs(x = "Year", y = "Average Blubber Thickness", title = i) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  scale_y_continuous(sec.axis = sec_axis(~ ., name = "Average Sea Surface Temperature", breaks = round(seq(min(avg_temp_scotland$north_sst), max(avg_temp_scotland$north_sst), by = 0.5),1)))
-                                                                                                                                     
-# Create plot for England
-plot_england <- ggplot() +
-  geom_line(data = avg_deaths_bt_england, aes(x = Year, y = `BT Average`, color = "Blubber Thickness"), size = 1.5) +
-  scale_color_manual(values = my_colors) +
-  labs(x = "Year", y = "Average Blubber Thickness", title = i) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  scale_y_continuous(sec.axis = sec_axis(~ ., name = "Average Sea Surface Temperature", breaks = round(seq(min(avg_temp_england$south_sst), max(avg_temp_england$south_sst), by = 0.5),1)))
-
-# Add plots to list
-}
-
-grid.arrange(plot_netherlands, ncol = 3)
