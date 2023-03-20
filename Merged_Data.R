@@ -4,6 +4,7 @@ library(knitr) #For tables
 library(tidyr) #For pivot_wider()
 library(ggplot2) #For graphs
 library(gridExtra) #For graph grids
+library(kableExtra)
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -69,10 +70,9 @@ year_table <- data_merged %>%
   as.data.frame() %>%
   `row.names<-`(.[,1]) %>%
   .[,-1] %>%
-  mutate(across(everything(), ~ ifelse(. == 0, NA, .))) %>% # replace 0 with NA
-  kable()
+  mutate(across(everything(), ~ ifelse(. == 0, NA, .))) # replace 0 with NA
 
-print(year_table)
+print(year_table, row.names = FALSE)
 
 #Age table by country
 age_table <- data_merged %>%
@@ -81,10 +81,9 @@ age_table <- data_merged %>%
   pivot_wider(names_from = "Country", values_from = "n", values_fill = 0) %>%
   as.data.frame() %>%
   `row.names<-`(.[,1]) %>%
-  .[,-1] %>%
-  kable()
+  .[,-1]
 
-print(age_table)
+print(age_table, row.names = FALSE)
 
 #Sex table by country
 sex_table <- data_merged %>%
@@ -93,10 +92,9 @@ sex_table <- data_merged %>%
   pivot_wider(names_from = "Country", values_from = "n", values_fill = 0) %>%
   as.data.frame() %>%
   `row.names<-`(.[,1]) %>%
-  .[,-1] %>%
-  kable
+  .[,-1]
 
-print(sex_table)
+print(sex_table, row.names = FALSE)
 
 #Death category table by country
 death_table <- data_merged %>%
@@ -105,12 +103,22 @@ death_table <- data_merged %>%
   pivot_wider(names_from = "Country", values_from = "n", values_fill = NA) %>%
   as.data.frame() %>%
   `row.names<-`(.[,1]) %>%
-  .[,-1] %>%
-  kable()
+  .[,-1]
 
-print(death_table)
+print(death_table, row.names = FALSE)
 
-# Calculate the BT average per Death category and Country
+
+## BT Average table per country
+# Calculate the average BT per Country
+avg_bt_country <- aggregate(`BT Average` ~ Country, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns
+avg_bt_country_wide <- pivot_wider(avg_bt_country, names_from = Country, values_from = `BT Average`)
+
+# Display the table using kable
+kable(avg_bt_country_wide, digits = 1, caption = "BT average per country")
+
+## Calculate the BT average per Death category and Country
 BT_table <- data_merged %>%
   group_by(`Death category`, `Country`) %>%
   summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
@@ -118,6 +126,26 @@ BT_table <- data_merged %>%
 
 # Create a table showing BT average per Death category and Country
 kable(BT_table, caption = "BT average per death category and country")
+
+## Calculate the BT average per Death category and Country
+BT_table_age <- data_merged %>%
+  group_by(`Age Group`, `Country`) %>%
+  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
+  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
+
+# Create a table showing BT average per Death category and Country
+kable(BT_table_age, caption = "BT average per age group and country")
+
+## Calculate the BT average per Sex and Country
+BT_table_sex <- data_merged %>%
+  group_by(`Sex`, `Country`) %>%
+  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
+  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
+
+# Create a table showing BT average per Sex and Country
+kable(BT_table_sex, caption = "BT average per sex and country")
+
+
 
 #----------------------------------
 
@@ -496,7 +524,7 @@ avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged
 avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_age_wide, digits = 1)
+kable(avg_bmi_country_age_wide, digits = 1, caption = "BMI average per age group and country")
 
 #----------------------------------
 
@@ -508,5 +536,17 @@ avg_bmi_country_sex <- aggregate(BMI ~ Country + Sex, data = data_merged, FUN = 
 avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_sex_wide, digits = 1)
+kable(avg_bmi_country_sex_wide, digits = 1, caption = "BMI average per sex and country")
+
+#----------------------------------
+
+## BMI table per sex and country
+# Calculate the average BMI per Country
+avg_bmi_country <- aggregate(BMI ~ Country, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns
+avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_wide, digits = 1, caption = "BMI average per country")
 
