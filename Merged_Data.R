@@ -17,6 +17,7 @@ data_merged$Sex <- as.factor(data_merged$Sex)
 data_merged$`Age Group` <- as.factor(data_merged$`Age Group`)
 data_merged$Country <- as.factor(data_merged$Country)
 data_merged$NCC <- as.factor(data_merged$NCC)
+data_merged$`Death category` <- as.factor(data_merged$`Death category`)
 
 #Convert month to an ordered factor variable
 data_merged$Month <- factor(data_merged$Month, levels = 1:12, ordered = TRUE)
@@ -57,8 +58,6 @@ if (is.na(lat)) {
 }
 }
 
-
-View(data_merged)
 #----------------------------------
 
 ##Data exploration tables
@@ -72,7 +71,7 @@ year_table <- data_merged %>%
   .[,-1] %>%
   mutate(across(everything(), ~ ifelse(. == 0, NA, .))) # replace 0 with NA
 
-print(year_table, row.names = FALSE)
+kable(year_table, row.names = TRUE, format = "markdown")
 
 #Age table by country
 age_table <- data_merged %>%
@@ -83,7 +82,7 @@ age_table <- data_merged %>%
   `row.names<-`(.[,1]) %>%
   .[,-1]
 
-print(age_table, row.names = FALSE)
+kable(age_table, row.names = TRUE, format = "markdown")
 
 #Sex table by country
 sex_table <- data_merged %>%
@@ -94,7 +93,7 @@ sex_table <- data_merged %>%
   `row.names<-`(.[,1]) %>%
   .[,-1]
 
-print(sex_table, row.names = FALSE)
+kable(sex_table, row.names = TRUE, format = "markdown")
 
 #Death category table by country
 death_table <- data_merged %>%
@@ -105,8 +104,7 @@ death_table <- data_merged %>%
   `row.names<-`(.[,1]) %>%
   .[,-1]
 
-print(death_table, row.names = FALSE)
-
+kable(death_table, row.names = TRUE, format = "markdown")
 
 ## BT Average table per country
 # Calculate the average BT per Country
@@ -116,7 +114,7 @@ avg_bt_country <- aggregate(`BT Average` ~ Country, data = data_merged, FUN = me
 avg_bt_country_wide <- pivot_wider(avg_bt_country, names_from = Country, values_from = `BT Average`)
 
 # Display the table using kable
-kable(avg_bt_country_wide, digits = 1, caption = "BT average per country")
+kable(avg_bt_country_wide, digits = 1, caption = "BT average per country", format = "markdown")
 
 ## Calculate the BT average per Death category and Country
 BT_table <- data_merged %>%
@@ -125,7 +123,7 @@ BT_table <- data_merged %>%
   pivot_wider(names_from = `Country`, values_from = `BT Mean`)
 
 # Create a table showing BT average per Death category and Country
-kable(BT_table, caption = "BT average per death category and country")
+kable(BT_table, caption = "BT average per death category and country", format = "markdown")
 
 ## Calculate the BT average per Death category and Country
 BT_table_age <- data_merged %>%
@@ -134,7 +132,7 @@ BT_table_age <- data_merged %>%
   pivot_wider(names_from = `Country`, values_from = `BT Mean`)
 
 # Create a table showing BT average per Death category and Country
-kable(BT_table_age, caption = "BT average per age group and country")
+kable(BT_table_age, caption = "BT average per age group and country", format = "markdown")
 
 ## Calculate the BT average per Sex and Country
 BT_table_sex <- data_merged %>%
@@ -143,9 +141,7 @@ BT_table_sex <- data_merged %>%
   pivot_wider(names_from = `Country`, values_from = `BT Mean`)
 
 # Create a table showing BT average per Sex and Country
-kable(BT_table_sex, caption = "BT average per sex and country")
-
-
+kable(BT_table_sex, caption = "BT average per sex and country", format = "markdown")
 
 #----------------------------------
 
@@ -512,7 +508,7 @@ avg_bmi_ncc <- aggregate(BMI ~ NCC, data = data_netherlands, FUN = mean, subset 
 avg_bmi_ncc$BMI <- round(avg_bmi_ncc$BMI, 1)
 
 # Display the table using kable
-kable(avg_bmi_ncc, digits = 1)
+kable(avg_bmi_ncc, digits = 1, row.names = FALSE, format = "markdown", caption = "NCC vs BMI")
 
 #----------------------------------
 
@@ -524,7 +520,7 @@ avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged
 avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_age_wide, digits = 1, caption = "BMI average per age group and country")
+kable(avg_bmi_country_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per age group and country")
 
 #----------------------------------
 
@@ -536,11 +532,11 @@ avg_bmi_country_sex <- aggregate(BMI ~ Country + Sex, data = data_merged, FUN = 
 avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_sex_wide, digits = 1, caption = "BMI average per sex and country")
+kable(avg_bmi_country_sex_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per sex and country")
 
 #----------------------------------
 
-## BMI table per sex and country
+## BMI table per country
 # Calculate the average BMI per Country
 avg_bmi_country <- aggregate(BMI ~ Country, data = data_merged, FUN = mean)
 
@@ -548,5 +544,6 @@ avg_bmi_country <- aggregate(BMI ~ Country, data = data_merged, FUN = mean)
 avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_wide, digits = 1, caption = "BMI average per country")
+kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
+
 
