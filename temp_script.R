@@ -19,11 +19,26 @@ south_sst$date <- as.Date(paste(south_sst$year, south_sst$month, "01", sep = "-"
 
 # Create line graph of SST by region and month
 ggplot() +
-  geom_line(data = north_sst, aes(x = date, y = temp), color = "#0072B2") +
-  geom_line(data = south_sst, aes(x = date, y = temp), color = "#D55E00") +
+  geom_line(data = north_sst, aes(x = date, y = temp, color = "North")) +
+  geom_line(data = south_sst, aes(x = date, y = temp, color = "South")) +
   labs(x = "Date", y = "Sea Surface Temperature (Celsius)", color = "Region") +
-  scale_color_manual(values = c("#0072B2", "#D55E00")) +
-  theme_minimal()
+  scale_color_manual(values = c("North" = "#0072B2", "South" = "#D55E00"), 
+                     labels = c("North", "South")) +
+  theme_minimal() +
+  theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical")
+
+# Create line graph of SST by region and month with trendline
+ggplot() +
+  geom_line(data = north_sst, aes(x = date, y = temp, color = "North")) +
+  geom_smooth(data = north_sst, aes(x = date, y = temp), method = "lm", se = FALSE, color = "#0072B2") +
+  geom_line(data = south_sst, aes(x = date, y = temp, color = "South")) +
+  geom_smooth(data = south_sst, aes(x = date, y = temp), method = "lm", se = FALSE, color = "#D55E00") +
+  labs(x = "Date", y = "Sea Surface Temperature (Celsius)", color = "Region") +
+  scale_color_manual(values = c("North" = "#0072B2", "South" = "#D55E00"), 
+                     labels = c("North", "South")) +
+  theme_minimal() +
+  theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical")
+
 
 ##Individual plots for temperature trends
 # Calculate average SST by year for north_sst
@@ -44,10 +59,10 @@ ggplot(data = north_sst_avg, aes(x = year, y = avg_temp)) +
   ggtitle("Average sea surface temperature in the northern North Sea by year") +
   xlab("Year") + ylab("Sea surface temperature (°C)")
 
-# Calculate average SST by year for north_sst
+# Calculate average SST by year for south_sst
 south_sst_avg <- south_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
 
-# Calculate trendline for north_sst
+# Calculate trendline for south_sst
 south_sst_trend <- lm(avg_temp ~ year, data = south_sst_avg)
 
 # Create plot for south_sst with trendline equation

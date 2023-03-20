@@ -56,6 +56,8 @@ if (is.na(lat)) {
 
 View(data_merged)
 
+summary(data_merged$Country)
+
 ##Data exploration tables
 #Year table
 year_table <- data_merged %>%
@@ -98,7 +100,7 @@ print(sex_table)
 death_table <- data_merged %>%
   group_by(Country, `Death category`) %>%
   summarize(n = n()) %>%
-  pivot_wider(names_from = "Country", values_from = "n", values_fill = 0) %>%
+  pivot_wider(names_from = "Country", values_from = "n", values_fill = NA) %>%
   as.data.frame() %>%
   `row.names<-`(.[,1]) %>%
   .[,-1] %>%
@@ -443,4 +445,23 @@ ggplot(mean_bt %>% filter(Country == "Scotland"),
   ggtitle("Mean Blubber Thickness Averages Over Time in Scotland") +
   labs(color = "Legend") +
   theme_bw()
+
+
+
+## Linear model length ~ body weight
+# calculate linear regression model
+model <- lm(`Length` ~ `Body weight`, data = data_merged)
+eqn <- paste("y = ", round(coef(model)[2], 2), "x + ", round(coef(model)[1], 2), "; R2 = ", round(summary(model)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Body weight (kg)", y = "Length (cm)") +
+  annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+
+
+
+
 
