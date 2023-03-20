@@ -9,10 +9,13 @@ library(gridExtra) #For graph grids
 data_merged <- rbind(DataNL, DataSL, DataEN)
 View(data_merged)
 
+#----------------------------------
+
 #Change data to correct data type
 data_merged$Sex <- as.factor(data_merged$Sex)
 data_merged$`Age Group` <- as.factor(data_merged$`Age Group`)
 data_merged$Country <- as.factor(data_merged$Country)
+data_merged$NCC <- as.factor(data_merged$NCC)
 
 #Convert month to an ordered factor variable
 data_merged$Month <- factor(data_merged$Month, levels = 1:12, ordered = TRUE)
@@ -55,8 +58,7 @@ if (is.na(lat)) {
 
 
 View(data_merged)
-
-summary(data_merged$Country)
+#----------------------------------
 
 ##Data exploration tables
 #Year table
@@ -116,6 +118,8 @@ BT_table <- data_merged %>%
 
 # Create a table showing BT average per Death category and Country
 kable(BT_table, caption = "BT average per death category and country")
+
+#----------------------------------
 
 ##Plots for data exploration
 
@@ -181,7 +185,7 @@ ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Country, color = 
   scale_color_discrete(name = "Country") +
   scale_y_continuous(limits = c(10, 22.5), breaks = seq(10, 22.5, by = 2))
 
-
+#----------------------------------
 ##Plot for monthly BT Average per sex and country
 #Create list to store the plots
 plot_list1 <- list()
@@ -216,6 +220,8 @@ grid.arrange(grobs = plot_list1, ncol = 3)
 # Define color palette
 my_colors <- c("#E69F00", "#56B4E9")
 
+
+#----------------------------------
 ##Plot for monthly BT Average per age group and country
 #Create list to store the plots
 plot_list2 <- list()
@@ -246,7 +252,7 @@ plot_list2[[i]] <- (age)
 #Arrange plots into grid
 grid.arrange(grobs = plot_list2, ncol = 3)
 
-
+#----------------------------------
 ## Plots of BT per death category
 # Create list to store the plots
 plot_list3 <- list()
@@ -274,7 +280,7 @@ plot_list3[[i]] <- death_bt
 # Arrange plots into a 3x3 grid
 grid.arrange(grobs = plot_list3, ncol = 3)
 
-
+#----------------------------------
 ## Boxplot BT Average Age group Juveniles/Adults
 #Filter to only include juveniles and adults
 data_merged <- data_merged %>%
@@ -312,7 +318,8 @@ ggplot(data = boxplot_data, aes(x = Age_Group, y = Weight)) +
   labs(x = "Age Group", y = "Weight") +
   ggtitle("Distribution of Weight by Age Group")
 
-## Boxplot BT Averages Male/Female
+#----------------------------------
+# Boxplot BT Averages Male/Female
 #Filter to include only males and females
 data_merged <- data_merged %>%
   filter(Sex %in% c("M", "F"))
@@ -349,7 +356,7 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
-###
+#----------------------------------
 
 # Create a line plot of the mean BT Average over time for each country
 ggplot(mean_bt, aes(x = Year, y = `BT Average`)) +
@@ -446,7 +453,7 @@ ggplot(mean_bt %>% filter(Country == "Scotland"),
   labs(color = "Legend") +
   theme_bw()
 
-
+#----------------------------------
 
 ## Linear model length ~ body weight
 # calculate linear regression model
@@ -460,8 +467,46 @@ ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Death category
   labs(x = "Body weight (kg)", y = "Length (cm)") +
   annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
 
+#----------------------------------
 
+# BMI calculations and add new column for BMI
+data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
+data_merged$BMI <- round(data_merged$BMI, 1)
 
+# Table with only Dutch data to compare NCC and average BMI
+# Filter data to rows where Country is "Netherlands"
+data_netherlands <- subset(data_merged, Country == "Netherlands")
 
+# Calculate the average BMI per NCC value where NCC is 1, 2, 3, 4, 5, or 6
+avg_bmi_ncc <- aggregate(BMI ~ NCC, data = data_netherlands, FUN = mean, subset = NCC %in% c(1,2,3,4,5,6))
 
+# Round the mean_BMI column to one decimal place
+avg_bmi_ncc$BMI <- round(avg_bmi_ncc$BMI, 1)
+
+# Display the table using kable
+kable(avg_bmi_ncc, digits = 1)
+
+#----------------------------------
+
+## BMI table per age group and country
+# Calculate the average BMI per Country and Age Group
+avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns and Age Group as rows
+avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_age_wide, digits = 1)
+
+#----------------------------------
+
+## BMI table per sex and country
+# Calculate the average BMI per Country and Sex
+avg_bmi_country_sex <- aggregate(BMI ~ Country + Sex, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns and Sex as rows
+avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_sex_wide, digits = 1)
 
