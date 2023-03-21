@@ -182,11 +182,14 @@ ggplot(data_merged, aes(x = Country, fill = `Death category`)) +
   ggtitle("Death category distribution by country") +
   theme(plot.title = element_text(hjust = 0.5))
 
+#-----
+
 # Calculate the mean blubber thickness by country and month
 avg_blubber <- aggregate(`BT Average` ~ Country + Month, data = data_merged, FUN = mean)
 
 # create a new data frame with the average blubber thickness per month and country
 avg_blubber <- data_merged %>%
+  #filter(`Age Group` != "N") %>%
   group_by(Month, Country) %>%
   summarise(avg_blubber_thickness = mean(`BT Average`))
 
@@ -277,7 +280,7 @@ plot_list2[[i]] <- (age)
 grid.arrange(grobs = plot_list2, ncol = 3)
 
 #----------------------------------
-## Plots of BT per death category
+## Plots of BT per death category - all countries
 # Create list to store the plots
 plot_list3 <- list()
 
@@ -303,6 +306,93 @@ plot_list3[[i]] <- death_bt
 
 # Arrange plots into a 3x3 grid
 grid.arrange(grobs = plot_list3, ncol = 3)
+
+#-----
+
+## Plots of BT per death category - Netherlands
+# Create list to store the plots
+plot_list4 <- list()
+
+# Create nine separate plots, one for each death category
+for (i in unique(subset(data_merged, Country == "Netherlands")$`Death category`)) {
+  
+  # Subset the data for the current category
+  category_data <- subset(subset(data_merged, Country == "Netherlands"), `Death category` == i)
+  
+  # Calculate the average number of deaths for each month and sex within the category
+  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  
+  # Plot the average number of deaths over time for each sex as a separate line
+  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+    geom_line() +
+    scale_color_manual(values = my_colors) +
+    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    theme_minimal()
+  
+  # Add plot to list
+  plot_list4[[i]] <- death_bt
+}
+
+# Arrange plots into a 3x3 grid
+grid.arrange(grobs = plot_list4, ncol = 3)
+
+#-----
+
+## Plots of BT per death category - England
+# Create list to store the plots
+plot_list5 <- list()
+
+# Create nine separate plots, one for each death category
+for (i in unique(subset(data_merged, Country == "England")$`Death category`)) {
+  
+  # Subset the data for the current category
+  category_data <- subset(subset(data_merged, Country == "England"), `Death category` == i)
+  
+  # Calculate the average number of deaths for each month and sex within the category
+  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  
+  # Plot the average number of deaths over time for each sex as a separate line
+  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+    geom_line() +
+    scale_color_manual(values = my_colors) +
+    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    theme_minimal()
+  
+  # Add plot to list
+  plot_list5[[i]] <- death_bt
+}
+
+# Arrange plots into a 3x3 grid
+grid.arrange(grobs = plot_list5, ncol = 3)
+
+#-----
+
+## Plots of BT per death category - Scotland
+# Create list to store the plots
+plot_list6 <- list()
+
+# Create nine separate plots, one for each death category
+for (i in unique(subset(data_merged, Country == "Scotland")$`Death category`)) {
+  
+  # Subset the data for the current category
+  category_data <- subset(subset(data_merged, Country == "Scotland"), `Death category` == i)
+  
+  # Calculate the average number of deaths for each month and sex within the category
+  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  
+  # Plot the average number of deaths over time for each sex as a separate line
+  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+    geom_line() +
+    scale_color_manual(values = my_colors) +
+    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    theme_minimal()
+  
+  # Add plot to list
+  plot_list6[[i]] <- death_bt
+}
+
+# Arrange plots into a 3x3 grid
+grid.arrange(grobs = plot_list6, ncol = 3)
 
 #----------------------------------
 ## Boxplot BT Average Age group Juveniles/Adults
@@ -479,13 +569,27 @@ ggplot(mean_bt %>% filter(Country == "Scotland"),
 
 #----------------------------------
 
-## Linear model length ~ body weight
+## Linear model length ~ body weight - color Death category
 # calculate linear regression model
-model <- lm(`Length` ~ `Body weight`, data = data_merged)
-eqn <- paste("y = ", round(coef(model)[2], 2), "x + ", round(coef(model)[1], 2), "; R2 = ", round(summary(model)$r.squared, 2), sep = "")
+model1 <- lm(`Length` ~ `Body weight`, data = data_merged)
+eqn <- paste("y = ", round(coef(model)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
 
 # plot data with linear regression line and equation
 ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Body weight (kg)", y = "Length (cm)") +
+  annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------------
+
+## Linear model length ~ body weight - color Country
+# calculate linear regression model
+model2 <- lm(`Length` ~ `Body weight`, data = data_merged)
+eqn <- paste("y = ", round(coef(model2)[2], 2), "x + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Country`)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   labs(x = "Body weight (kg)", y = "Length (cm)") +
