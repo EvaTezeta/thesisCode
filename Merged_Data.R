@@ -580,6 +580,34 @@ ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Death category
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   labs(x = "Body weight (kg)", y = "Length (cm)") +
   annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
+#----------------------------------
+
+## Linear model length ~ body weight - color Death category
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = data_merged)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------------
+
+## Linear model length ~ body weight - color Country
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = data_merged)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Country`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
 
 #----------------------------------
 
