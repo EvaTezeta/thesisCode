@@ -17,6 +17,8 @@ north_sst$date <- as.Date(paste(north_sst$year, north_sst$month, "01", sep = "-"
 # Convert month and year to date format for south_sst
 south_sst$date <- as.Date(paste(south_sst$year, south_sst$month, "01", sep = "-"), "%Y-%m-%d")
 
+#--------------------------------------
+
 # Create line graph of SST by region and month
 ggplot() +
   geom_line(data = north_sst, aes(x = date, y = temp, color = "North")) +

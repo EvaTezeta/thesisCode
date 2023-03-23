@@ -24,7 +24,7 @@ for (i in 1:nrow(DataNL)) {
   else if (DataNL$Findings[i] == "Starvation")
     DataNL$`Death category`[i] <- "Starvation"
   else if (DataNL$Findings[i] == "Emaciation")
-    DataNL$`Death category`[i] <- "Emaciation"
+    DataNL$`Death category`[i] <- "Starvation"
   else if (DataNL$Findings[i] == "Bycatch")
     DataNL$`Death category`[i] <- "Anthropogenic trauma"
   else if (DataNL$Findings[i] == "Other")
@@ -46,36 +46,6 @@ for (i in 1:nrow(DataNL)) {
   else if (DataNL$Findings[i] == "Dystocia")
     DataNL$`Death category`[i] <- "Other"
 }
-
-#Reassign death category for neonate porpoises - this one works!
-DataNL$`Death category`[DataNL$`Age Group` == "N" & DataNL$`Death category` == "Starvation"] <- "Perinatal"
-DataNL$`Death category`[DataNL$`Age Group` == "N" & DataNL$`Death category` == "Emaciation"] <- "Perinatal"
-
-#Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
-
-#Model residuals for juveniles and adults separately
-juvenile_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataNL, `Age Group` == "J"))
-juvenile_resid <- residuals(juvenile_lm)
-
-adult_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataNL, `Age Group` == "A"))
-adult_resid <- residuals(adult_lm)
-
-#Reassign existing "Starvation" and "Emaciation" categories based on residual sign for juveniles
-juv_starvation_idx <- which(DataNL$`Age Group` == "J" & DataNL$`Death category` == "Starvation")
-DataNL$`Death category`[juv_starvation_idx] <- ifelse(juvenile_resid[juv_starvation_idx] > 0, "Starvation", "Emaciation")
-
-juv_emaciation_idx <- which(DataNL$`Age Group` == "J" & DataNL$`Death category` == "Emaciation")
-DataNL$`Death category`[juv_emaciation_idx] <- ifelse(juvenile_resid[juv_emaciation_idx] > 0, "Starvation", "Emaciation")
-
-#Reassign existing "Starvation" and "Emaciation" categories based on residual sign for adults
-ad_starvation_idx <- which(DataNL$`Age Group` == "A" & DataNL$`Death category` == "Starvation")
-DataNL$`Death category`[ad_starvation_idx] <- ifelse(adult_resid[ad_starvation_idx] > 0, "Starvation", "Emaciation")
-
-ad_emaciation_idx <- which(DataNL$`Age Group` == "A" & DataNL$`Death category` == "Emaciation")
-DataNL$`Death category`[ad_emaciation_idx] <- ifelse(adult_resid[ad_emaciation_idx] > 0, "Starvation", "Emaciation")
-
-#Update remaining NA values to "Starvation/Emaciation" - NA shows up due to residuals = 0
-DataNL$`Death category`[is.na(DataNL$`Death category`)] <- "Starvation/Emaciation"
 
 
 #Change death category to factor - only AFTER otherwise won't work

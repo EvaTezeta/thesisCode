@@ -65,28 +65,6 @@ for (i in 1:nrow(DataEN)) {
     DataEN$`Death category`[i] <- "Other"
 }
 
-#Reassign death category for neonate porpoises - this one works!
-DataEN$`Death category`[DataEN$`Age Group` == "N" & DataEN$`Death category` == "Starvation"] <- "Perinatal"
-
-#Residuals of Age Group & Average BT change into correct Death Category for starvation/emaciation
-#Model residuals for juveniles and adults separately
-juvenile_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataEN, `Age Group` == "J"))
-juvenile_resid <- residuals(juvenile_lm)
-
-adult_lm <- lm(`BT Average` ~ `Death category`, data = subset(DataEN, `Age Group` == "A"))
-adult_resid <- residuals(adult_lm)
-
-#Classify death category based on residual sign for juveniles
-juv_idx <- which(DataEN$`Age Group` == "J" & DataEN$`Death category` == "Starvation")
-DataEN$`Death category`[juv_idx] <- ifelse(juvenile_resid[juv_idx] > 0, "Starvation", "Emaciation")
-
-#Classify death category based on residual sign for adults
-ad_idx <- which(DataEN$`Age Group` == "A" & DataEN$`Death category` == "Starvation")
-DataEN$`Death category`[ad_idx] <- ifelse(adult_resid[ad_idx] > 0, "Starvation", "Emaciation")
-
-#Update remaining NA values to "Starvation/Emaciation"
-DataEN$`Death category`[is.na(DataEN$`Death category`)] <- "Starvation/Emaciation"
-View(DataEN)
 
 #Change to Death category to factor - only AFTER reassigning! Otherwise won't work!
 DataEN$`Death category` <- as.factor(DataEN$`Death category`)

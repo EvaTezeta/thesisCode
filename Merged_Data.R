@@ -57,6 +57,7 @@ if (is.na(lat)) {
   }
 }
 }
+summary(data_merged$Country)
 
 #----------------------------------
 
@@ -105,6 +106,8 @@ death_table <- data_merged %>%
   .[,-1]
 
 kable(death_table, row.names = TRUE, format = "markdown")
+
+#-------------------------------------
 
 ## BT Average table per country
 # Calculate the average BT per Country
@@ -244,11 +247,8 @@ plot_list1[[i]] <- (p)
 #Arrange plots into grid
 grid.arrange(grobs = plot_list1, ncol = 3)
 
-# Define color palette
-my_colors <- c("#E69F00", "#56B4E9")
-
-
 #----------------------------------
+
 ##Plot for monthly BT Average per age group and country
 #Create list to store the plots
 plot_list2 <- list()
@@ -279,7 +279,7 @@ plot_list2[[i]] <- (age)
 #Arrange plots into grid
 grid.arrange(grobs = plot_list2, ncol = 3)
 
-#----------------------------------
+#----------------------------------------
 ## Plots of BT per death category - all countries
 # Create list to store the plots
 plot_list3 <- list()
@@ -470,102 +470,6 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
-#----------------------------------
-
-# Create a line plot of the mean BT Average over time for each country
-ggplot(mean_bt, aes(x = Year, y = `BT Average`)) +
-  geom_line(size = 0.6) +
-  xlab("Year") +
-  ylab("Mean BT Average") +
-  ggtitle("Mean BT Average Over Time by Country") +
-  facet_wrap(~ Country, ncol = 3)
-
-# Calculate the mean BT Average for each year and country
-mean_bt <- aggregate(`BT Average` ~ Year + Country, data_merged, mean)
-
-# Line plot for the Netherlands with x-axis labels every 2 years
-ggplot(mean_bt %>% filter(Country == "Netherlands"), 
-       aes(x = Year, y = `BT Average`)) +
-  geom_line(size = 0.8) +
-  scale_x_continuous(breaks = seq(2008, 2021, 2)) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages (mm)") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in the Netherlands")
-
-# Line plot for Scotland with x-axis labels every 2 years
-ggplot(mean_bt %>% filter(Country == "Scotland"), 
-       aes(x = Year, y = `BT Average`)) +
-  geom_line(size = 0.8) +
-  scale_x_continuous(breaks = seq(1992, 2022, 5)) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages (mm)") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in Scotland")
-
-# Line plot for England with x-axis labels every 2 years
-ggplot(mean_bt %>% filter(Country == "England"), 
-       aes(x = Year, y = `BT Average`)) +
-  geom_line(size = 0.8) +
-  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages (mm)") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in England")
-
-## This one works, but no righter y axis values yet
-# Calculate the average sea surface temperature per year from south_sst dataframe
-avg_sst_south <- south_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
-
-# Line plot for England with x-axis labels every 2 years and sea surface temperature line
-ggplot(mean_bt %>% filter(Country == "England"), 
-       aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
-  geom_line(size = 0.8) +
-  geom_line(data = avg_sst_south, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
-  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
-  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
-  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
-                                         breaks = seq(8, 12, 0.5))) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages in mm") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in England") +
-  labs(color = "Legend") +
-  theme_bw()
-
-# Filter mean_bt for the Netherlands starting from 2008
-mean_bt_nl <- mean_bt %>% filter(Country == "Netherlands" & Year >= 2008)
-
-# Calculate the average sea surface temperature per year from south_sst dataframe for years >= 2008
-avg_sst_south <- south_sst %>% filter(year >= 2008) %>% group_by(year) %>% summarize(avg_temp = mean(temp))
-
-# Line plot for the Netherlands with x-axis labels every 2 years and sea surface temperature line
-ggplot(mean_bt_nl, aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
-  geom_line(size = 0.8) +
-  geom_line(data = avg_sst_south, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
-  scale_x_continuous(breaks = seq(2008, 2020, 2)) +
-  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
-  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
-                                         breaks = seq(8, 12, 0.5))) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages in mm") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in the Netherlands") +
-  labs(color = "Legend") +
-  theme_bw()
-
-# Calculate the average sea surface temperature per year from south_sst dataframe
-avg_sst_north <- north_sst %>% group_by(year) %>% summarize(avg_temp = mean(temp))
-
-# Line plot for Scotland with x-axis labels every 2 years and sea surface temperature line
-ggplot(mean_bt %>% filter(Country == "Scotland"), 
-       aes(x = Year, y = `BT Average`, color = "Average Blubber Thickness")) +
-  geom_line(size = 0.8) +
-  geom_line(data = avg_sst_north, aes(x = year, y = avg_temp * 1, color = "Sea Surface Temperature"), size = 0.8) +
-  scale_x_continuous(breaks = seq(1990, 2020, 5)) +
-  scale_color_manual(values = c("Average Blubber Thickness" = "blue", "Sea Surface Temperature" = "red")) +
-  scale_y_continuous(sec.axis = sec_axis(~ . / 10, name = "Average Sea Surface Temperature (°C)",
-                                         breaks = seq(8, 12, 0.5))) +
-  xlab("Year") +
-  ylab("Mean Blubber Thickness Averages in mm") +
-  ggtitle("Mean Blubber Thickness Averages Over Time in Scotland") +
-  labs(color = "Legend") +
-  theme_bw()
 
 #----------------------------------
 
