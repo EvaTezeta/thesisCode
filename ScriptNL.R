@@ -6,6 +6,15 @@ library(dplyr) #Use of pipes
 DataNL <- read_excel("DataNL.xlsx")
 View(DataNL)  
 
+#Load in vriezer dieren
+Vriezer_dieren_all <- read_excel("Vriezer_dieren_all.xlsx")
+View(Vriezer_dieren_all)
+
+#Remove frozen porpoises
+porpoise_ids <- Vriezer_dieren_all$`frozen_porpoise`
+DataNL <- DataNL %>%
+  filter(!Idcode %in% porpoise_ids)
+
 #Changing the values to correct type
 DataNL$DCC <- as.integer(DataNL$DCC)
 DataNL$NCC <- as.integer(DataNL$NCC)
