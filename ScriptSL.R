@@ -6,6 +6,14 @@ library(readxl) #To import Excel files
 DataSL <- read_excel("DataSL.xlsx")
 View(DataSL)
 
+#Import frozen porpoises
+frozen_porpoise_smass <- read_excel("frozen_porpoise_smass.xlsx")
+View(frozen_porpoise_smass)
+
+#Remove frozen porpoises
+porpoise_ids <- frozen_porpoise_smass$`frozen_porpoise`
+DataSL <- DataSL %>%
+  filter(!Idcode %in% porpoise_ids)
 
 #Define the mapping between Composition code and DCC
 mapping <- c("freshly dead- died on beach (code 2a)" = 1,
