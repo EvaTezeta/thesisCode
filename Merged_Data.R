@@ -473,20 +473,7 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
 
 #----------------------------------
 
-## Linear model length ~ body weight - color Death category
-# calculate linear regression model
-model1 <- lm(`Length` ~ `Body weight`, data = data_merged)
-eqn <- paste("y = ", round(coef(model)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
-
-# plot data with linear regression line and equation
-ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Death category`)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "Body weight (kg)", y = "Length (cm)") +
-  annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
-#----------------------------------
-
-## Linear model length ~ body weight - color Death category
+## Linear model body weight ~ length - color Death category
 # calculate linear regression model
 model1 <- lm(`Body weight` ~ `Length`, data = data_merged)
 eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
@@ -500,7 +487,7 @@ ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Death category
 
 #----------------------------------
 
-## Linear model length ~ body weight - color Country
+## Linear model body weight ~ length - color Country
 # calculate linear regression model
 model1 <- lm(`Body weight` ~ `Length`, data = data_merged)
 eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
@@ -511,21 +498,6 @@ ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Country`)) +
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   labs(x = "Length (cm)", y = "Body weight (kg)") +
   annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
-
-
-#----------------------------------
-
-## Linear model length ~ body weight - color Country
-# calculate linear regression model
-model2 <- lm(`Length` ~ `Body weight`, data = data_merged)
-eqn <- paste("y = ", round(coef(model2)[2], 2), "x + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
-
-# plot data with linear regression line and equation
-ggplot(data_merged, aes(x = `Body weight`, y = `Length`, color = `Country`)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "Body weight (kg)", y = "Length (cm)") +
-  annotate("text", x = min(data_merged$`Body weight`), y = max(data_merged$Length), label = eqn, size = 4, hjust = 0, vjust = 1)
 
 #----------------------------------
 
@@ -581,5 +553,146 @@ avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, value
 
 # Display the table using kable
 kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
+
+
+#-----------------------------------
+
+## Linear model body weight ~ length - color NCC
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = subset(data_merged, Country == "Netherlands"))
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Body weight`, color = `NCC`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands with NCC") +
+  ggtitle("Relationship between Body weight and Length in the Netherlands with NCC") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------
+#LM only Netherlands
+## Linear model body weight ~ length - color Death category
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = subset(data_merged, Country == "Netherlands"))
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands") +
+  ggtitle("Relationship between Body weight and Length in the Netherlands") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------
+#LM only Scotland
+## Linear model body weight ~ length - color Death category
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = subset(data_merged, Country == "Scotland"))
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(subset(data_merged, Country == "Scotland"), aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in Scotland") +
+  ggtitle("Relationship between Body weight and Length in Scotland") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------
+#LM only England
+## Linear model body weight ~ length - color Death category
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = subset(data_merged, Country == "England"))
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(subset(data_merged, Country == "England"), aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in England") +
+  ggtitle("Relationship between Body weight and Length in England") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#----------------------------
+
+## Linear model with log-transformed predictor variable - all countries
+# create log-transformed predictor variable
+data_merged$log_Length <- log(data_merged$Length)
+
+# calculate linear regression model on log-transformed data
+model2 <- lm(`Body weight` ~ log_Length, data = data_merged)
+eqn2 <- paste("y = ", round(coef(model2)[2], 2), "log(x) + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
+
+# plot log-transformed data with linear regression line and equation
+ggplot(data_merged, aes(x = log_Length, y = `Body weight`, color = `Country`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Log-length", y = "Body weight (kg)", title = "Relationship between Body weight and Log-Length") +
+  ggtitle("Relationship between Body weight and Log-Length") +
+  annotate("text", x = min(data_merged$log_Length), y = max(data_merged$`Body weight`), label = eqn2, size = 4, hjust = 0, vjust = 1)
+
+
+#----------
+## Linear model with log-transformed predictor variable - Netherlands
+# subset data to only include observations from the Netherlands
+data_nl <- subset(data_merged, Country == "Netherlands")
+
+# create log-transformed predictor variable
+data_nl$log_Length <- log(data_nl$Length)
+
+# calculate linear regression model on log-transformed data for Netherlands only
+model2 <- lm(`Body weight` ~ log_Length, data = data_nl)
+eqn2 <- paste("y = ", round(coef(model2)[2], 2), "log(x) + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
+
+# plot log-transformed data with linear regression line and equation for Netherlands only
+ggplot(data_nl, aes(x = log_Length, y = `Body weight`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Log-length", y = "Body weight (kg)", title = "Relationship between Body weight and Log-Length in the Netherlands") +
+  ggtitle("Relationship between Body weight and Log-Length in the Netherlands") +
+  annotate("text", x = min(data_nl$log_Length), y = max(data_nl$`Body weight`), label = eqn2, size = 4, hjust = 0, vjust = 1)
+
+#----------
+## Linear model with log-transformed predictor variable - Scotland
+# subset data to only include observations from Scotland
+data_sl <- subset(data_merged, Country == "Scotland")
+
+# create log-transformed predictor variable
+data_sl$log_Length <- log(data_sl$Length)
+
+# calculate linear regression model on log-transformed data for Scotland only
+model2 <- lm(`Body weight` ~ log_Length, data = data_sl)
+eqn2 <- paste("y = ", round(coef(model2)[2], 2), "log(x) + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
+
+# plot log-transformed data with linear regression line and equation for Scotland only
+ggplot(data_sl, aes(x = log_Length, y = `Body weight`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Log-length", y = "Body weight (kg)", title = "Relationship between Body weight and Log-Length in Scotland") +
+  ggtitle("Relationship between Body weight and Log-Length in Scotland") +
+  annotate("text", x = min(data_sl$log_Length), y = max(data_sl$`Body weight`), label = eqn2, size = 4, hjust = 0, vjust = 1)
+
+#----------
+## Linear model with log-transformed predictor variable - England
+# subset data to only include observations from England
+data_en <- subset(data_merged, Country == "England")
+
+# create log-transformed predictor variable
+data_en$log_Length <- log(data_en$Length)
+
+# calculate linear regression model on log-transformed data for England only
+model2 <- lm(`Body weight` ~ log_Length, data = data_en)
+eqn2 <- paste("y = ", round(coef(model2)[2], 2), "log(x) + ", round(coef(model2)[1], 2), "; R2 = ", round(summary(model2)$r.squared, 2), sep = "")
+
+# plot log-transformed data with linear regression line and equation for England only
+ggplot(data_en, aes(x = log_Length, y = `Body weight`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Log-length", y = "Body weight (kg)", title = "Relationship between Body weight and Log-Length in England") +
+  ggtitle("Relationship between Body weight and Log-Length in England") +
+  annotate("text", x = min(data_en$log_Length), y = max(data_en$`Body weight`), label = eqn2, size = 4, hjust = 0, vjust = 1)
+
 
 
