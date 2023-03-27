@@ -58,7 +58,6 @@ if (is.na(lat)) {
 }
 }
 
-#---------------------------------
 #Create a function to determine the meteorological season based on day and month
 get_season <- function(day, month) {
   # determine the meteorological season based on day and month
@@ -75,6 +74,85 @@ get_season <- function(day, month) {
 
 #Create a new column "met_season" based on day and month
 data_merged$met_season <- mapply(get_season, data_merged$Day, data_merged$Month)
+
+# BMI calculations and add new column for BMI
+data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
+data_merged$BMI <- round(data_merged$BMI, 1)
+
+####################################################################### Run until here for complete dataset
+####################################################################### Now start data exploration
+
+# Table with only Dutch data to compare NCC and average BMI
+# Filter data to rows where Country is "Netherlands"
+data_netherlands <- subset(data_merged, Country == "Netherlands")
+
+# Calculate the average BMI per NCC value where NCC is 1, 2, 3, 4, 5, or 6
+avg_bmi_ncc <- aggregate(BMI ~ NCC, data = data_netherlands, FUN = mean, subset = NCC %in% c(1,2,3,4,5,6))
+
+# Round the mean_BMI column to one decimal place
+avg_bmi_ncc$BMI <- round(avg_bmi_ncc$BMI, 1)
+
+# Display the table using kable
+kable(avg_bmi_ncc, digits = 1, row.names = FALSE, format = "markdown", caption = "NCC vs BMI")
+
+#----------------------------------
+
+## BMI table per age group and country
+# Calculate the average BMI per Country and Age Group
+avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns and Age Group as rows
+avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per age group and country")
+
+#----------------------------------
+
+## BMI table per sex and country
+# Calculate the average BMI per Country and Sex
+avg_bmi_country_sex <- aggregate(BMI ~ Country + Sex, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns and Sex as rows
+avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_sex_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per sex and country")
+
+#----------------------------------
+
+## BMI table per country
+# Calculate the average BMI per Country
+avg_bmi_country <- aggregate(BMI ~ Country, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns
+avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
+
+#-----
+
+# Calculate the average BMI per Country and Season
+avg_bmi_season <- aggregate(BMI ~ Country + met_season, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with met_season as columns
+avg_bmi_season_wide <- pivot_wider(avg_bmi_season, names_from = met_season, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_season_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country and season")
+
+#-----
+
+# Calculate the mean BMI per Country and Death Category
+avg_bmi_deathcat <- aggregate(BMI ~ Country + `Death category`, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns 
+avg_bmi_deathcat_wide <- pivot_wider(avg_bmi_deathcat, names_from = Country, values_from = BMI)
+
+# Display the table using kable with Death Category as rows
+kable(avg_bmi_deathcat_wide, digits = 1, row.names = TRUE, format = "markdown", caption = "BMI average per country and death category")
+
 
 #----------------------------------
 
@@ -449,6 +527,7 @@ ggplot(data = boxplot_data, aes(x = Age_Group, y = Weight)) +
   labs(x = "Age Group", y = "Weight") +
   ggtitle("Distribution of Weight by Age Group")
 
+
 #----------------------------------
 # Boxplot BT Averages Male/Female
 #Filter to include only males and females
@@ -487,7 +566,10 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
+#######################################################################
+#######################################################################
 
+#Linear models
 #----------------------------------
 
 ## Linear model body weight ~ length - color Death category
@@ -502,6 +584,9 @@ ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Death category
   labs(x = "Length (cm)", y = "Body weight (kg)") +
   annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
 
+# Create a scatter plot of residuals against BT Averages
+plot(data_merged$`BT Average`, residuals(model1), main = "Residuals vs BT Average", xlab = "BT Average", ylab = "Residuals")
+abline(h = 0, lty = 2, col = "red")
 #----------------------------------
 
 ## Linear model body weight ~ length - color Country
@@ -515,83 +600,6 @@ ggplot(data_merged, aes(x = `Length`, y = `Body weight`, color = `Country`)) +
   geom_smooth(method = "lm", se = FALSE, color = "black") +
   labs(x = "Length (cm)", y = "Body weight (kg)") +
   annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
-
-#----------------------------------
-
-# BMI calculations and add new column for BMI
-data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
-data_merged$BMI <- round(data_merged$BMI, 1)
-
-# Table with only Dutch data to compare NCC and average BMI
-# Filter data to rows where Country is "Netherlands"
-data_netherlands <- subset(data_merged, Country == "Netherlands")
-
-# Calculate the average BMI per NCC value where NCC is 1, 2, 3, 4, 5, or 6
-avg_bmi_ncc <- aggregate(BMI ~ NCC, data = data_netherlands, FUN = mean, subset = NCC %in% c(1,2,3,4,5,6))
-
-# Round the mean_BMI column to one decimal place
-avg_bmi_ncc$BMI <- round(avg_bmi_ncc$BMI, 1)
-
-# Display the table using kable
-kable(avg_bmi_ncc, digits = 1, row.names = FALSE, format = "markdown", caption = "NCC vs BMI")
-
-#----------------------------------
-
-## BMI table per age group and country
-# Calculate the average BMI per Country and Age Group
-avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with Country as columns and Age Group as rows
-avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
-
-# Display the table using kable
-kable(avg_bmi_country_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per age group and country")
-
-#----------------------------------
-
-## BMI table per sex and country
-# Calculate the average BMI per Country and Sex
-avg_bmi_country_sex <- aggregate(BMI ~ Country + Sex, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with Country as columns and Sex as rows
-avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, names_from = Country, values_from = BMI)
-
-# Display the table using kable
-kable(avg_bmi_country_sex_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per sex and country")
-
-#----------------------------------
-
-## BMI table per country
-# Calculate the average BMI per Country
-avg_bmi_country <- aggregate(BMI ~ Country, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with Country as columns
-avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, values_from = BMI)
-
-# Display the table using kable
-kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
-
-#-----
-
-# Calculate the average BMI per Country and Season
-avg_bmi_season <- aggregate(BMI ~ Country + met_season, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with met_season as columns
-avg_bmi_season_wide <- pivot_wider(avg_bmi_season, names_from = met_season, values_from = BMI)
-
-# Display the table using kable
-kable(avg_bmi_season_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country and season")
-
-#-----
-
-# Calculate the mean BMI per Country and Death Category
-avg_bmi_deathcat <- aggregate(BMI ~ Country + `Death category`, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with Country as columns 
-avg_bmi_deathcat_wide <- pivot_wider(avg_bmi_deathcat, names_from = Country, values_from = BMI)
-
-# Display the table using kable with Death Category as rows
-kable(avg_bmi_deathcat_wide, digits = 1, row.names = TRUE, format = "markdown", caption = "BMI average per country and death category")
 
 #-----------------------------------
 
