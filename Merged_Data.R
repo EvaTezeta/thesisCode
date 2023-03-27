@@ -57,7 +57,24 @@ if (is.na(lat)) {
   }
 }
 }
-summary(data_merged$Country)
+
+#---------------------------------
+#Create a function to determine the meteorological season based on day and month
+get_season <- function(day, month) {
+  # determine the meteorological season based on day and month
+  if (month %in% c(12, 1, 2)) {
+    return("Winter")
+  } else if (month %in% c(3, 4, 5)) {
+    return("Spring")
+  } else if (month %in% c(6, 7, 8)) {
+    return("Summer")
+  } else if (month %in% c(9, 10, 11)) {
+    return("Autumn")
+  }
+}
+
+#Create a new column "met_season" based on day and month
+data_merged$met_season <- mapply(get_season, data_merged$Day, data_merged$Month)
 
 #----------------------------------
 
@@ -554,6 +571,27 @@ avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, value
 # Display the table using kable
 kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
 
+#-----
+
+# Calculate the average BMI per Country and Season
+avg_bmi_season <- aggregate(BMI ~ Country + met_season, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with met_season as columns
+avg_bmi_season_wide <- pivot_wider(avg_bmi_season, names_from = met_season, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_season_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country and season")
+
+#-----
+
+# Calculate the mean BMI per Country and Death Category
+avg_bmi_deathcat <- aggregate(BMI ~ Country + `Death category`, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns 
+avg_bmi_deathcat_wide <- pivot_wider(avg_bmi_deathcat, names_from = Country, values_from = BMI)
+
+# Display the table using kable with Death Category as rows
+kable(avg_bmi_deathcat_wide, digits = 1, row.names = TRUE, format = "markdown", caption = "BMI average per country and death category")
 
 #-----------------------------------
 
@@ -569,6 +607,20 @@ ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Bod
   labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands with NCC") +
   ggtitle("Relationship between Body weight and Length in the Netherlands with NCC") +
   annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+# Calculate the residuals from the linear regression model
+residuals <- resid(model1)
+
+# Bin the residuals into 6 levels
+bins <- cut(residuals, breaks = 6)
+
+# Add the binned residuals as a new column to the data_merged dataset
+data_merged <- data_merged %>%
+  filter(Country == "Netherlands") %>%
+  mutate(BMI_level = bins)
+
+# View the resulting dataset
+head(data_merged)
 
 #----------------------------
 #LM only Netherlands
@@ -694,5 +746,18 @@ ggplot(data_en, aes(x = log_Length, y = `Body weight`)) +
   ggtitle("Relationship between Body weight and Log-Length in England") +
   annotate("text", x = min(data_en$log_Length), y = max(data_en$`Body weight`), label = eqn2, size = 4, hjust = 0, vjust = 1)
 
+#-------
 
+## Linear model body weight ~ length - color NCC
+# calculate linear regression model
+model1 <- lm(`BMI` ~ `BT Average`, data = data_merged)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `NCC`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "BT Average", y = "BMI", title = "Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
+  ggtitle("Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
+  annotate("text", x = min(data_merged$`BT Average`), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
 
