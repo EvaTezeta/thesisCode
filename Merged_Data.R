@@ -5,6 +5,7 @@ library(tidyr) #For pivot_wider()
 library(ggplot2) #For graphs
 library(gridExtra) #For graph grids
 library(kableExtra)
+library(mgcv) #For GAM models
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -808,4 +809,52 @@ ggplot(data_nl, aes(x = `SST`, y = `BMI`)) +
   labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST in the Netherlands") +
   ggtitle("Relationship between BMI and SST in the Netherlands") +
   annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#####################################################
+
+# Create linear model with BMI as response and Age Group as predictor
+model1 <- lm(BMI ~ `Age Group`, data = data_merged)
+
+# View summary of model results
+summary(model1)
+
+#------
+
+# Create linear model with BMI as response and Age Group and BT as predictors
+model2 <- lm(BMI ~ `Age Group` + `BT Average`, data = data_merged)
+
+# View summary of model results
+summary(model2)
+
+#------
+
+# Create linear model with BMI as response and Age Group and BT as predictors
+model3 <- lm(BMI ~ `Age Group` + `BT Average` + Year, data = data_merged)
+
+# View summary of model results
+summary(model3)
+
+#------
+
+# Create linear model with BMI as response and Age Group and BT as predictors
+model4 <- lm(BMI ~ `Age Group` + `BT Average` + Year + met_season, data = data_merged)
+
+# View summary of model results
+summary(model4)
+
+#------
+
+# Create linear model with BMI as response and Age Group and BT as predictors
+model5 <- lm(BMI ~ `Age Group` + `BT Average` + Year*SST, data = data_merged)
+
+# View summary of model results
+summary(model5)
+
+#------
+
+# Create linear model with BMI as response and Age Group and BT as predictors
+model6 <- lm(BMI ~ `Age Group` + `BT Average` + Sex + Year + SST*Country, data = data_merged)
+
+# View summary of model results
+summary(model6)
 
