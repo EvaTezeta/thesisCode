@@ -79,8 +79,15 @@ data_merged$met_season <- mapply(get_season, data_merged$Day, data_merged$Month)
 data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
 data_merged$BMI <- round(data_merged$BMI, 1)
 
+
+
 ####################################################################### Run until here for complete dataset
-####################################################################### Now start data exploration
+
+
+####################################################################### Now starts the data exploration
+
+
+
 
 # Table with only Dutch data to compare NCC and average BMI
 # Filter data to rows where Country is "Netherlands"
@@ -756,7 +763,7 @@ ggplot(data_en, aes(x = log_Length, y = `Body weight`)) +
 
 #-------
 
-## Linear model body weight ~ length - color NCC
+## Linear model BMI ~ BT Averages - color NCC
 # calculate linear regression model
 model1 <- lm(`BMI` ~ `BT Average`, data = data_merged)
 eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
@@ -768,4 +775,37 @@ ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `NCC`)) +
   labs(x = "BT Average", y = "BMI", title = "Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
   ggtitle("Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
   annotate("text", x = min(data_merged$`BT Average`), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#-------
+
+## Linear model BMI ~ SST
+# calculate linear regression model
+model1 <- lm(BMI ~ SST, data = data_merged)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `SST`, y = `BMI`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST") +
+  ggtitle("Relationship between BMI and SST") +
+  annotate("text", x = min(data_merged$SST), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#-----------
+
+# Only use Dutch data
+data_nl <- subset(data_merged, Country == "Netherlands")
+
+## Linear model BMI ~ SST
+# calculate linear regression model
+model1 <- lm(BMI ~ SST, data = data_nl)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_nl, aes(x = `SST`, y = `BMI`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST in the Netherlands") +
+  ggtitle("Relationship between BMI and SST in the Netherlands") +
+  annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
 
