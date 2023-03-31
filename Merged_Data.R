@@ -810,6 +810,25 @@ ggplot(data_nl, aes(x = `SST`, y = `BMI`)) +
   ggtitle("Relationship between BMI and SST in the Netherlands") +
   annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
 
+#--------
+
+# Only use Dutch data
+data_nl <- subset(data_merged, Country == "Netherlands")
+
+## Linear model BMI ~ SST - color = Season
+# calculate linear regression model
+model1 <- lm(BMI ~ SST, data = data_nl)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_nl, aes(x = `SST`, y = `BMI`, color = met_season)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST in the Netherlands") +
+  ggtitle("Relationship between BMI and SST in the Netherlands") +
+  annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+
 #####################################################
 
 # Create linear model with BMI as response and Age Group as predictor
@@ -853,7 +872,7 @@ summary(model5)
 #------
 
 # Create linear model with BMI as response and Age Group and BT as predictors
-model6 <- lm(BMI ~ `Age Group` + `BT Average` + Sex + Year + SST*Country, data = data_merged)
+model6 <- lm(BMI ~ `Age Group` + `BT Average` + Sex + Year + SST*met_season, data = data_merged)
 
 # View summary of model results
 summary(model6)
