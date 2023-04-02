@@ -30,6 +30,11 @@ TukeyHSD(fit1)
 # Conduct an ANOVA for BMI between Death categories
 fit2 <- aov(BMI ~ `Death category`, data = data_nl)
 summary(fit2)
+# Conduct a Tukey's HSD post-hoc test
+TukeyHSD(fit2)
+
+summary(data_nl$`Death category`)
+
 
 ###### Linear models
 

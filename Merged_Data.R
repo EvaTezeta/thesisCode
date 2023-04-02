@@ -86,10 +86,10 @@ data_merged$BMI <- round(data_merged$BMI, 1)
 
 
 
-####################################################################### Run until here for complete dataset and then ECS_script
-
-
-####################################################################### Now starts the data exploration
+####################################################################### 
+#### End main program
+####################################################################### 
+#### Now starts the data exploration
 
 
 
