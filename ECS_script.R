@@ -18,6 +18,21 @@ View(data_merged)
 # Only use Dutch data
 data_nl <- subset(data_merged, Country == "Netherlands")
 
+#T-test to test for differences between BMI and Sex
+t.test(BMI ~ Sex, data = data_nl)
+
+# Conduct an ANOVA for BMI between seasons
+fit1 <- aov(BMI ~ met_season, data = data_nl)
+summary(fit1)
+# Conduct a Tukey's HSD post-hoc test
+TukeyHSD(fit1)
+
+# Conduct an ANOVA for BMI between Death categories
+fit2 <- aov(BMI ~ `Death category`, data = data_nl)
+summary(fit2)
+
+###### Linear models
+
 #Making the first model with the variables BMI and Age Group
 model1 <- lm(BMI ~ `Age Group`, data = data_nl) 
 tab_model(model1, dv.labels = "BMI")
@@ -164,3 +179,20 @@ plot(dfbetas(model10)[,1],
      main = "slope")
 plot(dfbetas(model11)[,1],
      main = "slope")
+
+
+#----------------------------
+#LM only Netherlands
+## Linear model body weight ~ length - color Death category
+# calculate linear regression model
+model1 <- lm(`Body weight` ~ `Length`, data = subset(data_merged, Country == "Netherlands"))
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black", size = 0.7) +
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands") +
+  ggtitle("Relationship between body weight and length of harbour porpoises") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
