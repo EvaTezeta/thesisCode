@@ -6,6 +6,8 @@ library(ggplot2) #For graphs
 library(gridExtra) #For graph grids
 library(kableExtra)
 library(mgcv) #For GAM models
+library(sjPlot) #For LM tables
+
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -19,6 +21,8 @@ data_merged$`Age Group` <- as.factor(data_merged$`Age Group`)
 data_merged$Country <- as.factor(data_merged$Country)
 data_merged$NCC <- as.factor(data_merged$NCC)
 data_merged$`Death category` <- as.factor(data_merged$`Death category`)
+data_nl$`BT Average` <- as.factor(data_nl$`BT Average`)
+
 
 #Convert month to an ordered factor variable
 data_merged$Month <- factor(data_merged$Month, levels = 1:12, ordered = TRUE)
@@ -82,7 +86,7 @@ data_merged$BMI <- round(data_merged$BMI, 1)
 
 
 
-####################################################################### Run until here for complete dataset
+####################################################################### Run until here for complete dataset and then ECS_script
 
 
 ####################################################################### Now starts the data exploration
@@ -837,43 +841,7 @@ model1 <- lm(BMI ~ `Age Group`, data = data_merged)
 # View summary of model results
 summary(model1)
 
-#------
-
-# Create linear model with BMI as response and Age Group and BT as predictors
-model2 <- lm(BMI ~ `Age Group` + `BT Average`, data = data_merged)
-
-# View summary of model results
-summary(model2)
-
-#------
-
-# Create linear model with BMI as response and Age Group and BT as predictors
-model3 <- lm(BMI ~ `Age Group` + `BT Average` + Year, data = data_merged)
-
-# View summary of model results
-summary(model3)
-
-#------
-
-# Create linear model with BMI as response and Age Group and BT as predictors
-model4 <- lm(BMI ~ `Age Group` + `BT Average` + Year + met_season, data = data_merged)
-
-# View summary of model results
-summary(model4)
-
-#------
-
-# Create linear model with BMI as response and Age Group and BT as predictors
-model5 <- lm(BMI ~ `Age Group` + `BT Average` + Year*SST, data = data_merged)
-
-# View summary of model results
-summary(model5)
-
-#------
-
-# Create linear model with BMI as response and Age Group and BT as predictors
-model6 <- lm(BMI ~ `Age Group` + `BT Average` + Sex + Year + SST*met_season, data = data_merged)
-
-# View summary of model results
-summary(model6)
+#Making the first model with the variables BMI and Age Group
+model1 <- lm(BMI ~ `Age Group`, data = data_merged) 
+tab_model(model1, dv.labels = "BMI")
 
