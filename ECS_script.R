@@ -9,6 +9,8 @@ library(mgcv) #For GAM models
 library(sjPlot) #For LM tables
 library(Metrics) #For the MSE
 library(regclass) #For the VIF
+library(multcomp) #For Tukey
+library(lsmeans) #For Tukey
 
 ############################################## Script for ECS
 
@@ -35,6 +37,25 @@ TukeyHSD(fit2)
 
 summary(data_nl$`Death category`)
 
+#Correlation tests
+cor.test(data_nl$`Body weight`, data_nl$Length, method = "spearman", exact = FALSE)
+#rho=0.95 -> very large positive association
+
+cor.test(data_nl$BMI, data_nl$`BT Average`, method = "spearman", exact = FALSE)
+#rho=0.63 -> large positive association
+
+cor.test(data_nl$BMI, data_nl$SST, method = "spearman", exact = FALSE)
+#rho=-0.41 -> medium negative association
+
+
+kruskal.test(data_nl$BMI ~ data_nl$`Age Group`, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$`BT Average`, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$Sex, data = data_nl) # p = 0.5056
+kruskal.test(data_nl$BMI ~ data_nl$Girth, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$`Death category`, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$met_season, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$SST, data = data_nl) #Sig
+kruskal.test(data_nl$BMI ~ data_nl$Year, data = data_nl) #Sig
 
 ###### Linear models
 

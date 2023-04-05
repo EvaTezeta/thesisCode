@@ -21,7 +21,6 @@ data_merged$`Age Group` <- as.factor(data_merged$`Age Group`)
 data_merged$Country <- as.factor(data_merged$Country)
 data_merged$NCC <- as.factor(data_merged$NCC)
 data_merged$`Death category` <- as.factor(data_merged$`Death category`)
-data_nl$`BT Average` <- as.factor(data_nl$`BT Average`)
 
 
 #Convert month to an ordered factor variable
@@ -86,9 +85,9 @@ data_merged$BMI <- round(data_merged$BMI, 1)
 
 
 
-####################################################################### 
-#### End main program
-####################################################################### 
+####################################### 
+#### End main program             ####              
+####################################### 
 #### Now starts the data exploration
 
 
