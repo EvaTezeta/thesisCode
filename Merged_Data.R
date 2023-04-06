@@ -844,3 +844,7 @@ summary(model1)
 model1 <- lm(BMI ~ `Age Group`, data = data_merged) 
 tab_model(model1, dv.labels = "BMI")
 
+
+kruskal.test(data_merged$`BT Average` ~ data_merged$`Age Group`, data = data_merged) #Sig
+
+
