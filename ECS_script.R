@@ -58,6 +58,23 @@ kruskal.test(data_nl$BMI ~ data_nl$SST, data = data_nl) #Sig
 kruskal.test(data_nl$BMI ~ data_nl$Year, data = data_nl) #Sig
 kruskal.test(data_nl$`BT Average` ~ data_nl$`Age Group`, data = data_nl) #Sig
 
+###### Plots for poster
+
+##Plot for monthly BMI Average per Age Group
+# Define color palette
+my_colors <- c("#d7301f", "#0868ac")
+
+# Calculate the average BMI for each month, Age Group
+avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_nl, FUN = mean)
+
+# Create a plot for both Age Groups "J" and "A"
+ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
+  geom_line() +
+  scale_color_manual(values = my_colors) +
+  labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
+  theme_minimal()
+
+
 ###### Linear models - backwards elimination
 
 #Making the first model with all predictors
@@ -200,4 +217,19 @@ ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Bod
   labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands") +
   ggtitle("Relationship between body weight and length of harbour porpoises") +
   annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+#--------------
+
+## Linear model BMI ~ SST
+# calculate linear regression model
+modelSST <- lm(BMI ~ SST, data = data_nl)
+eqn <- paste("y = ", round(coef(modelSST)[2], 2), "x + ", round(coef(modelSST)[1], 2), "; R2 = ", round(summary(modelSST)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_nl, aes(x = `SST`, y = `BMI`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST") +
+  ggtitle("Relationship between BMI and SST") +
+  annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
 
