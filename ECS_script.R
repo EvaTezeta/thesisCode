@@ -70,9 +70,22 @@ avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_nl, FUN = mean)
 # Create a plot for both Age Groups "J" and "A"
 ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
   geom_line() +
-  scale_color_manual(values = my_colors) +
+  scale_color_manual(values = my_colors, labels = c("Juvenile", "Adult")) +
   labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
   theme_minimal()
+
+# Remove NA's from SST
+data_nl_clean <- data_nl[!is.na(data_nl$SST), ]
+
+## Create a scatterplot with BMI and SST on the y-axis and Month on the x-axis
+ggplot(data_nl_clean, aes(x = Month, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal()
+
+
+
 
 
 ###### Linear models - backwards elimination
