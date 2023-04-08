@@ -74,10 +74,11 @@ ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = 
   labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
   theme_minimal()
 
+## Create a scatterplot with BMI and SST on the y-axis and Month on the x-axis
 # Remove NA's from SST
 data_nl_clean <- data_nl[!is.na(data_nl$SST), ]
 
-## Create a scatterplot with BMI and SST on the y-axis and Month on the x-axis
+#Create plot with BMI and SST per Month
 ggplot(data_nl_clean, aes(x = Month, y = BMI, color = SST)) +
   geom_point() +
   labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month") +
