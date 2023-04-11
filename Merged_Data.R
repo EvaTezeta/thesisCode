@@ -652,10 +652,10 @@ eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2
 ggplot(subset(data_merged, Country == "Netherlands"), aes(x = `Length`, y = `Body weight`, color = `Death category`)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length in the Netherlands") +
-  ggtitle("Relationship between Body weight and Length in the Netherlands") +
-  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1)
-
+  labs(x = "Length (cm)", y = "Body weight (kg)", title = "Relationship between Body weight and Length of Harbour Porpoises") +
+  ggtitle("Relationship between Body weight and Length of Harbour Porpoises") +
+  annotate("text", x = min(data_merged$Length), y = max(data_merged$`Body weight`), label = eqn, size = 4, hjust = 0, vjust = 1) +
+  theme(legend.text = element_text(size = 10))
 #----------------------------
 #LM only Scotland
 ## Linear model body weight ~ length - color Death category
