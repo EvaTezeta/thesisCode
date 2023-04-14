@@ -31,9 +31,9 @@ for (i in 1:nrow(DataNL)) {
   if (DataNL$Findings[i] == "Grey seal victim")
     DataNL$`Death category`[i] <- "Interspecific interaction"
   else if (DataNL$Findings[i] == "Starvation")
-    DataNL$`Death category`[i] <- "Starvation"
+    DataNL$`Death category`[i] <- "Malnutrition"
   else if (DataNL$Findings[i] == "Emaciation")
-    DataNL$`Death category`[i] <- "Starvation"
+    DataNL$`Death category`[i] <- "Malnutrition"
   else if (DataNL$Findings[i] == "Bycatch")
     DataNL$`Death category`[i] <- "Anthropogenic trauma"
   else if (DataNL$Findings[i] == "Other")

@@ -40,7 +40,7 @@ for (i in 1:nrow(DataEN)) {
   if (DataEN$Findings[i] == "Physical Trauma, Grey Seal Attack")
     DataEN$`Death category`[i] <- "Interspecific interaction"
   else if (DataEN$Findings[i] == "Starvation")
-    DataEN$`Death category`[i] <- "Starvation"
+    DataEN$`Death category`[i] <- "Malnutrition"
   else if (DataEN$Findings[i] == "Pneumonia")
     DataEN$`Death category`[i] <- "Infectious disease"
   else if (DataEN$Findings[i] == "Infectious")

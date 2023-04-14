@@ -17,6 +17,26 @@ north_sst$date <- as.Date(paste(north_sst$year, north_sst$month, "01", sep = "-"
 # Convert month and year to date format for south_sst
 south_sst$date <- as.Date(paste(south_sst$year, south_sst$month, "01", sep = "-"), "%Y-%m-%d")
 
+# Create a function to determine the meteorological season based on month
+get_season <- function(month) {
+  # determine the meteorological season based on month
+  if (month %in% c(12, 1, 2)) {
+    return("Winter")
+  } else if (month %in% c(3, 4, 5)) {
+    return("Spring")
+  } else if (month %in% c(6, 7, 8)) {
+    return("Summer")
+  } else if (month %in% c(9, 10, 11)) {
+    return("Autumn")
+  }
+}
+
+# Create a new column "met_season" based on month in south_sst
+south_sst$met_season <- mapply(get_season, south_sst$month)
+
+# Create a new column "met_season" based on month in north_sst
+north_sst$met_season <- mapply(get_season, north_sst$month)
+
 #--------------------------------------
 
 # Create line graph of SST by region and month
@@ -40,6 +60,32 @@ ggplot() +
                      labels = c("North", "South")) +
   theme_minimal() +
   theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical")
+#------
+# Create line graph of SST by region and month for each season
+ggplot() +
+  geom_line(data = north_sst, aes(x = date, y = temp, color = "North")) +
+  geom_line(data = south_sst, aes(x = date, y = temp, color = "South")) +
+  labs(x = "Date", y = "Sea Surface Temperature (Celsius)", color = "Region") +
+  scale_color_manual(values = c("North" = "#0072B2", "South" = "#D55E00"), 
+                     labels = c("North", "South")) +
+  theme_minimal() +
+  theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical") +
+  facet_wrap(~ met_season, nrow = 2, scales = "free_y")
+
+
+# Create line graph of SST by region and month for each season with trendlines
+ggplot() +
+  geom_line(data = north_sst, aes(x = date, y = temp, color = "North")) +
+  geom_smooth(data = north_sst, aes(x = date, y = temp, color = "North"), method = "lm", se = FALSE) +
+  geom_line(data = south_sst, aes(x = date, y = temp, color = "South")) +
+  geom_smooth(data = south_sst, aes(x = date, y = temp, color = "South"), method = "lm", se = FALSE) +
+  labs(x = "Date", y = "Sea Surface Temperature (Celsius)", color = "Region") +
+  scale_color_manual(values = c("North" = "#0072B2", "South" = "#D55E00"), 
+                     labels = c("North", "South")) +
+  theme_minimal() +
+  theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical") +
+  facet_wrap(~ met_season, nrow = 2, scales = "free_y") +
+  ggtitle("Sea Surface Temperature by Region and Season in the North Sea")
 
 
 ##Individual plots for temperature trends

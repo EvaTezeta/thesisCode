@@ -49,7 +49,7 @@ for (i in 1:nrow(DataSL)) {
   if (DataSL$Findings[i] == "Physical Trauma: Bottlenose Dolphin Attack")
     DataSL$`Death category`[i] <- "Interspecific interaction"
   else if (DataSL$Findings[i] == "Starvation/Hypothermia")
-    DataSL$`Death category`[i] <- "Starvation"
+    DataSL$`Death category`[i] <- "Malnutrition"
   else if (DataSL$Findings[i] == "Physical Trauma: Anthropogenic")
     DataSL$`Death category`[i] <- "Anthropogenic trauma"
   else if (DataSL$Findings[i] == "Not Established")

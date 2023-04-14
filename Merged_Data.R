@@ -7,6 +7,7 @@ library(gridExtra) #For graph grids
 library(kableExtra)
 library(mgcv) #For GAM models
 library(sjPlot) #For LM tables
+library(ggrepel) #To identify outliers
 
 
 #Merge three datasets together
@@ -577,6 +578,92 @@ ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
   labs(x = "Sex Group", y = "Weight") +
   ggtitle("Distribution of Weight by Sex Group")
 
+################################ Scatterplot BMI & SST
+
+## Create a scatterplot with BMI and SST on the y-axis and Month on the x-axis
+# Remove NA's from SST
+data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
+
+#Create plot with BMI and SST per Month
+ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal()
+
+## Scatterplot with BMI and SST per Month per Country
+# Remove NA's from SST
+data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
+
+# Create plot with BMI and SST per Month for each country in one grid
+ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month per Country") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  facet_wrap(~ Country, ncol = 3)
+
+## Create a scatterplot with BMI and SST on the y-axis and Year on the x-axis
+# Remove NA's from SST
+data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
+
+#Create plot with BMI and SST per Year
+ggplot(data_merged_clean, aes(x = Year, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Year", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Year") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  facet_wrap(~ Country, ncol = 3)
+
+## Scatterplot BMI and SST per Year
+# Remove NA's from SST
+data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
+
+#Create plot with BMI and SST per Year and met_season
+ggplot(data_merged_clean, aes(x = Year, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Year", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Year and Season") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  facet_wrap(~ met_season, ncol = 4)
+
+# Scatterplot with only trauma cases
+# Filter the data for the trauma cases (with interspecific interaction)
+data_merged_trauma <- data_merged_clean %>%
+  filter(`Death category` %in% c("Anthropogenic trauma", "Other trauma", "Interspecific interaction"))
+
+# Create plot with BMI and SST per Year and met_season
+ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Year", y = "BMI and SST (°C)", color = "SST", 
+       title = "Average BMI and SST of Harbour Porpoises per Year and Season (Trauma cases only, with II)") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["Year", "Estimate"], 2), "x")), 
+            hjust = 1, vjust = 1, size = 4)
+
+# Scatterplot with only trauma cases
+# Filter the data for the trauma cases (without interspecific interaction)
+data_merged_trauma <- data_merged_clean %>%
+  filter(`Death category` %in% c("Anthropogenic trauma", "Other trauma"))
+
+# Create plot with BMI and SST per Year and met_season
+ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Year", y = "BMI and SST (°C)", color = "SST", 
+       title = "Average BMI and SST of Harbour Porpoises per Year and Season (Trauma cases only)") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["Year", "Estimate"], 2), "x")), 
+            hjust = 1, vjust = 1, size = 4)
+
+
+
+
+
+
 #######################################################################
 #######################################################################
 
@@ -767,18 +854,36 @@ ggplot(data_en, aes(x = log_Length, y = `Body weight`)) +
 
 #-------
 
-## Linear model BMI ~ BT Averages - color NCC
+## Linear model BMI ~ BT Averages - color CDC
 # calculate linear regression model
 model1 <- lm(`BMI` ~ `BT Average`, data = data_merged)
 eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
 
 # plot data with linear regression line and equation
-ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `NCC`)) + 
+ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `Death category`)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "BT Average", y = "BMI", title = "Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
-  ggtitle("Relationship between BMI and Blubber Thickness in the Netherlands with NCC") +
+  labs(x = "BT Average", y = "BMI", title = "Relationship between BMI and Blubber Thickness with CDC") +
+  ggtitle("Relationship between BMI and Blubber Thickness with CDC") +
+  annotate("text", x = min(data_merged$`BT Average`), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1) 
+
+
+
+# calculate linear regression model
+model1 <- lm(`BMI` ~ `BT Average`, data = data_merged)
+eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
+
+# create scatterplot with linear regression line and equation
+p <- ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `Death category`)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "BT Average", y = "BMI", title = "Relationship between BMI and Blubber Thickness with CDC") +
+  ggtitle("Relationship between BMI and Blubber Thickness with CDC") +
   annotate("text", x = min(data_merged$`BT Average`), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
+
+# identify and label outliers using ggrepel
+outliers <- boxplot.stats(data_merged$`BMI`)$out
+p + geom_text_repel(data = data_merged[data_merged$`BMI` %in% outliers, ], aes(label = Idcode))
 
 #-------
 
