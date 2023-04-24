@@ -193,19 +193,6 @@ avg_bmi_deathcat_wide <- pivot_wider(avg_bmi_deathcat, names_from = Country, val
 # Display the table using kable with Death Category as rows
 kable(avg_bmi_deathcat_wide, digits = 1, row.names = TRUE, format = "markdown", caption = "BMI average per country and death category")
 
-#---------------------------------
-
-##Plot for monthly BMI Average per Age Group
-# Calculate the average BMI for each month, Age Group
-avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_merged, FUN = mean)
-
-# Create a plot for both Age Groups "J" and "A"
-ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
-  geom_line() +
-  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Juvenile", "Adult")) +
-  labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
-  theme(plot.title = element_text(hjust = 0.5))
-
 #----------------------------------
 
 ##Data exploration tables
@@ -299,45 +286,6 @@ met_season_table <- data_merged %>%
 kable(met_season_table, row.names = TRUE, format = "markdown")
 
 
-#-------------------------------------
-
-## BT Average table per country
-# Calculate the average BT per Country
-avg_bt_country <- aggregate(`BT Average` ~ Country, data = data_merged, FUN = mean)
-
-# Reshape the data to a wide format with Country as columns
-avg_bt_country_wide <- pivot_wider(avg_bt_country, names_from = Country, values_from = `BT Average`)
-
-# Display the table using kable
-kable(avg_bt_country_wide, digits = 1, caption = "BT average per country", format = "markdown")
-
-## Calculate the BT average per Death category and Country
-BT_table <- data_merged %>%
-  group_by(`Death category`, `Country`) %>%
-  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
-  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
-
-# Create a table showing BT average per Death category and Country
-kable(BT_table, caption = "BT average per death category and country", format = "markdown")
-
-## Calculate the BT average per Death category and Country
-BT_table_age <- data_merged %>%
-  group_by(`Age Group`, `Country`) %>%
-  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
-  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
-
-# Create a table showing BT average per Death category and Country
-kable(BT_table_age, caption = "BT average per age group and country", format = "markdown")
-
-## Calculate the BT average per Sex and Country
-BT_table_sex <- data_merged %>%
-  group_by(`Sex`, `Country`) %>%
-  summarize(`BT Mean` = round(mean(`BT Average`), 2)) %>%
-  pivot_wider(names_from = `Country`, values_from = `BT Mean`)
-
-# Create a table showing BT average per Sex and Country
-kable(BT_table_sex, caption = "BT average per sex and country", format = "markdown")
-
 #----------------------------------
 
 ##Plots for data exploration
@@ -347,16 +295,17 @@ ggplot(data_merged, aes(x = Year, fill = Country)) +
   geom_histogram(binwidth = 1, alpha = 0.5, position = "dodge") +
   facet_wrap(~ Country, ncol = 3) +
   labs(x = "Year", y = "Frequency") +
+  theme_bw() +
   theme(legend.position = "bottom") +
   scale_fill_manual(values = c(my_colors)) +
-  ggtitle("Histogram of Year by Country: England, the Netherlands, and Scotland")
-
+  ggtitle("Number of Stranded Porpoises per Year by Country")
 
 #Histogram of blubber thickness averages by country
 ggplot(data_merged, aes(x = `BT Average`, fill = Country)) +
   geom_histogram(binwidth = 1, alpha = 0.5, position = "dodge") +
   facet_wrap(~ Country, ncol = 3) +
   labs(x = "Blubber thickness averages (mm)", y = "Frequency") +
+  theme_bw() +
   theme(legend.position = "bottom") +
   scale_fill_manual(values = c(my_colors))
 
@@ -365,7 +314,7 @@ ggplot(data_merged, aes(x = Country, fill = Sex)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Sex") +
   ggtitle("Sex distribution by country") +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_bw() +
   scale_fill_manual(values = c(my_colors), labels = c("Female", "Male"))
 
 
@@ -374,7 +323,7 @@ ggplot(data_merged, aes(x = Country, fill = `Age Group`)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Age Group") +
   ggtitle("Age Class distribution by Country") +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_bw() +
   scale_fill_manual(values = c(my_colors), 
                     name = "Age Class", 
                     labels = c("Adult", "Juvenile", "Neonate"))
@@ -384,40 +333,59 @@ ggplot(data_merged, aes(x = Country, fill = `Age Group`)) +
 ggplot(data_merged, aes(x = Country, fill = `Death category`)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Death category") +
-  ggtitle("Cause of Death frequency by Country") +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Number of Causes of Death by Country") +
+  theme_bw() +
   scale_fill_manual(values = c(my_colors), 
                     name = "Cause of Death categories")
 
-#-----
+#---------------------------------
+##### Linegraphs BMI
+##Plot for monthly BMI Average per Age Group - appendix
+# Calculate the average BMI for each month, Age Group
+avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_merged, FUN = mean)
 
-# Calculate the mean blubber thickness by country and month
-avg_blubber <- aggregate(`BT Average` ~ Country + Month, data = data_merged, FUN = mean)
-
-# create a new data frame with the average blubber thickness per month and country
-avg_blubber <- data_merged %>%
-  #filter(`Age Group` != "N") %>%
-  group_by(Month, Country) %>%
-  summarise(avg_blubber_thickness = mean(`BT Average`))
-
-# plot the average blubber thickness per month and country
-ggplot(avg_blubber, aes(x = Month, y = avg_blubber_thickness, color = Country)) +
+# Create a plot for both Age Groups "J" and "A"
+ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
   geom_line() +
-  labs(title = "Average Blubber Thickness", 
+  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Juvenile", "Adult")) +
+  labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
+  theme_bw()
+
+#---------------------------------
+
+##Plot for monthly BMI Average per Sex - appendix
+# Calculate the average BMI for each month, Age Group
+avg_bmi_sex <- aggregate(BMI ~ Month + Sex, data = data_merged, FUN = mean)
+
+# Create a plot for both Sex "F" and "M"
+ggplot(data = subset(avg_bmi_sex, Sex %in% c("F", "M")), aes(x = Month, y = `BMI`, group = Sex, color = Sex)) +
+  geom_line() +
+  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Female", "Male")) +
+  labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Female and Male Porpoises") +
+  theme_bw()
+
+
+#---------------------------------
+##Plot for monthly BMI Average per Country
+# Calculate the mean BMI by country and month
+avg_bmi <- aggregate(BMI ~ Country + Month, data = data_merged, FUN = mean)
+
+# create a new data frame with the average BMI per month and country
+# Filter out neonates
+avg_bmi <- data_merged %>%
+  filter(`Age Group` != "N") %>%
+  group_by(Month, Country) %>%
+  summarise(avg_bmi = mean(BMI))
+
+# plot the average BMI per month and country
+ggplot(avg_bmi, aes(x = Month, y = avg_bmi, color = Country, group = Country)) +
+  geom_line() +
+  labs(title = "Average Monthly BMI per Country", 
        x = "Month",
-       y = "Average Blubber Thickness (mm)") +
+       y = "Average BMI") +
   scale_color_manual(values = c(my_colors)) +
   theme_bw()
 
-# Calculate the average blubber thickness for each month and country
-avg_bt <- aggregate(`BT Average` ~ Month + Country, data = data_merged, FUN = mean)
-
-# Plot the average blubber thickness over time for each country as a separate line
-ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Country, color = Country)) +
-  geom_line() +
-  labs(x = "Month", y = "Average blubber thickness (mm)") +
-  scale_color_discrete(name = "Country") +
-  scale_y_continuous(limits = c(10, 22.5), breaks = seq(10, 22.5, by = 2))
 
 #----------------------------------
 ##Plot for monthly BMI per sex and country
@@ -438,7 +406,7 @@ for (i in unique(data_merged$Country)) {
     geom_line() +
     scale_color_manual(values = my_colors, labels = c("Female", "Male")) +
     labs(x = "Month", y = "Average BMI", title = i) +
-    theme_minimal() 
+    theme_bw() 
   
   #Add plots to list
   plot_list1[[i]] <- (p)
@@ -468,42 +436,11 @@ plot_list2 <- list()
 
 # Create three separate plots, one for each country
 for (i in unique(data_merged$Country)) {
-
-# Subset the data for the current country
-country_data <- subset(data_merged, Country == i)
-
-# Calculate the average blubber thickness for each month, sex, and country
-avg_bmi_age <- aggregate(BMI ~ Month + `Age Group`, data = country_data, FUN = mean)
-
-# Filter to only include "J" and "A" in Age Group
-avg_bmi_age <- subset(avg_bmi_age, `Age Group` %in% c("J", "A"))
-
-# Create separate plots for each country
-age <- ggplot(data = avg_bmi_age, aes(x = Month, y = BMI, group = `Age Group`, color = `Age Group`)) +
-  geom_line() +
-  labs(x = "Month", y = "Average BMI", title = i) +
-  scale_color_manual(values = my_colors) +
-  theme_bw()
-
-#Add plot to plot list
-plot_list2[[i]] <- (age)
-}
-
-#Arrange plots into grid
-grid.arrange(grobs = plot_list2, ncol = 3)
-#---
-
-##Plot for monthly BMI per age group and country
-#Create list to store the plots
-plot_list2 <- list()
-
-# Create three separate plots, one for each country
-for (i in unique(data_merged$Country)) {
   
   # Subset the data for the current country
   country_data <- subset(data_merged, Country == i)
   
-  # Calculate the average blubber thickness for each month, sex, and country
+  # Calculate the average BMI for each month, sex, and country
   avg_bmi_age <- aggregate(BMI ~ Month + `Age Group`, data = country_data, FUN = mean)
   
   # Filter to only include "J" and "A" in Age Group
@@ -535,7 +472,7 @@ plot_final2 <- plot_grid(title2, plot_grid2, ncol = 1, rel_heights = c(0.1, 0.9)
 #Print plot
 plot_final2
 #----------------------------------------
-## Plots of BT per death category - all countries
+## Plots of BMI per death category - all countries
 # Create list to store the plots
 plot_list3 <- list()
 
@@ -546,17 +483,17 @@ for (i in unique(data_merged$`Death category`)) {
 category_data <- subset(data_merged, `Death category` == i)
 
 # Calculate the average number of deaths for each month and sex within the category
-avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+avg_deaths_bmi <- aggregate(BMI ~ Month + Sex, data = category_data, FUN = mean)
 
 # Plot the average number of deaths over time for each sex as a separate line
-death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+death_bmi <- ggplot(data = avg_deaths_bmi, aes(x = Month, y = BMI, group = Sex, color = Sex)) +
   geom_line() +
   scale_color_manual(values = my_colors) +
-  labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+  labs(x = "Month", y = "Average BMI", title = i) +
   theme_minimal()
 
 # Add plot to list
-plot_list3[[i]] <- death_bt
+plot_list3[[i]] <- death_bmi
 }
 
 # Arrange plots into a 3x3 grid
@@ -564,7 +501,7 @@ grid.arrange(grobs = plot_list3, ncol = 3)
 
 #-----
 
-## Plots of BT per death category - Netherlands
+## Plots of BMI per death category - Netherlands
 # Create list to store the plots
 plot_list4 <- list()
 
@@ -574,18 +511,18 @@ for (i in unique(subset(data_merged, Country == "Netherlands")$`Death category`)
   # Subset the data for the current category
   category_data <- subset(subset(data_merged, Country == "Netherlands"), `Death category` == i)
   
-  # Calculate the average number of deaths for each month and sex within the category
-  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  # Calculate the average BMI for each month and sex within the category
+  avg_deaths_bmi <- aggregate(BMI ~ Month + Sex, data = category_data, FUN = mean)
   
   # Plot the average number of deaths over time for each sex as a separate line
-  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+  death_bmi <- ggplot(data = avg_deaths_bmi, aes(x = Month, y = BMI, group = Sex, color = Sex)) +
     geom_line() +
     scale_color_manual(values = my_colors) +
-    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    labs(x = "Month", y = "Average BMI", title = i) +
     theme_minimal()
   
   # Add plot to list
-  plot_list4[[i]] <- death_bt
+  plot_list4[[i]] <- death_bmi
 }
 
 # Arrange plots into a 3x3 grid
@@ -593,7 +530,7 @@ grid.arrange(grobs = plot_list4, ncol = 3)
 
 #-----
 
-## Plots of BT per death category - England
+## Plots of BMI per death category - England
 # Create list to store the plots
 plot_list5 <- list()
 
@@ -604,17 +541,17 @@ for (i in unique(subset(data_merged, Country == "England")$`Death category`)) {
   category_data <- subset(subset(data_merged, Country == "England"), `Death category` == i)
   
   # Calculate the average number of deaths for each month and sex within the category
-  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  avg_deaths_bmi <- aggregate(BMI ~ Month + Sex, data = category_data, FUN = mean)
   
   # Plot the average number of deaths over time for each sex as a separate line
-  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+  death_bmi <- ggplot(data = avg_deaths_bmi, aes(x = Month, y = BMI, group = Sex, color = Sex)) +
     geom_line() +
     scale_color_manual(values = my_colors) +
-    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    labs(x = "Month", y = "Average BMI", title = i) +
     theme_minimal()
   
   # Add plot to list
-  plot_list5[[i]] <- death_bt
+  plot_list5[[i]] <- death_bmi
 }
 
 # Arrange plots into a 3x3 grid
@@ -622,7 +559,7 @@ grid.arrange(grobs = plot_list5, ncol = 3)
 
 #-----
 
-## Plots of BT per death category - Scotland
+## Plots of BMI per death category - Scotland
 # Create list to store the plots
 plot_list6 <- list()
 
@@ -633,98 +570,23 @@ for (i in unique(subset(data_merged, Country == "Scotland")$`Death category`)) {
   category_data <- subset(subset(data_merged, Country == "Scotland"), `Death category` == i)
   
   # Calculate the average number of deaths for each month and sex within the category
-  avg_deaths_bt <- aggregate(`BT Average` ~ Month + Sex, data = category_data, FUN = mean)
+  avg_deaths_bt <- aggregate(BMI ~ Month + Sex, data = category_data, FUN = mean)
   
   # Plot the average number of deaths over time for each sex as a separate line
-  death_bt <- ggplot(data = avg_deaths_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
+  death_bmi <- ggplot(data = avg_deaths_bmi, aes(x = Month, y = BMI, group = Sex, color = Sex)) +
     geom_line() +
     scale_color_manual(values = my_colors) +
-    labs(x = "Month", y = "Average Blubber Thickness", title = i) +
+    labs(x = "Month", y = "Average BMI", title = i) +
     theme_minimal()
   
   # Add plot to list
-  plot_list6[[i]] <- death_bt
+  plot_list6[[i]] <- death_bmi
 }
 
 # Arrange plots into a 3x3 grid
 grid.arrange(grobs = plot_list6, ncol = 3)
 
 #----------------------------------
-## Boxplot BT Average Age group Juveniles/Adults
-#Filter to only include juveniles and adults
-data_merged <- data_merged %>%
-  filter(`Age Group` %in% c("J", "A"))
-
-# Subset the data for juvenile and adult porpoises
-juvenile_data <- subset(data_merged, `Age Group` == "J")
-adult_data <- subset(data_merged, `Age Group` == "A")
-
-# Add Age Group column to the data frames
-juvenile_data <- mutate(juvenile_data, Age_Group = "Juvenile")
-adult_data <- mutate(adult_data, Age_Group = "Adult")
-
-# Combine the data frames
-boxplot_data <- rbind(juvenile_data, adult_data)
-
-# Calculate the mean BT Average and Weight for each age group
-juvenile_mean <- mean(juvenile_data$`BT Average`)
-adult_mean <- mean(adult_data$`BT Average`)
-juvenile_weight_mean <- mean(juvenile_data$`Body weight`)
-adult_weight_mean <- mean(adult_data$`Body weight`)
-
-# Create a boxplot to visualize the distribution of BT Average and Weight for each age group
-boxplot_data <- data.frame(Age_Group = c(rep("Juvenile", nrow(juvenile_data)), rep("Adult", nrow(adult_data))),
-                           BT.Average = c(juvenile_data$`BT Average`, adult_data$`BT Average`),
-                           Weight = c(juvenile_data$`Body weight`, adult_data$`Body weight`))
-
-ggplot(data = boxplot_data, aes(x = Age_Group, y = BT.Average)) +
-  geom_boxplot() +
-  labs(x = "Age Group", y = "BT Average") +
-  ggtitle("Distribution of BT Average by Age Group")
-
-ggplot(data = boxplot_data, aes(x = Age_Group, y = Weight)) +
-  geom_boxplot() +
-  labs(x = "Age Group", y = "Weight") +
-  ggtitle("Distribution of Weight by Age Group")
-
-
-#----------------------------------
-# Boxplot BT Averages Male/Female
-#Filter to include only males and females
-data_merged <- data_merged %>%
-  filter(Sex %in% c("M", "F"))
-
-#Subset data for male and female porpoises
-male_data <- subset(data_merged, Sex == "M")
-female_data <- subset(data_merged, Sex == "F")
-
-#Add Sex column to dataframes
-male_data <- mutate(male_data, Sex_Group = "Male")
-female_data <- mutate(female_data, Sex_Group = "Female")
-
-#Combine dataframes
-boxplot_data_sex <- rbind(male_data, female_data)
-
-#Calculate the mean BT Average and Weight for each sex group
-male_mean <- mean(male_data$`BT Average`)
-female_mean <- mean(female_data$`BT Average`)
-male_weight_mean <- mean(male_data$`Body weight`)
-female_weight_mean <- mean(female_data$`Body weight`)
-
-#Create a boxplot to visualize the distribution of BT Average and Weight for each sex group
-boxplot_data_sex <- data.frame(Sex_Group = c(rep("Male", nrow(male_data)), rep("Female", nrow(female_data))),
-                           BT.Average = c(male_data$`BT Average`, female_data$`BT Average`),
-                           Weight = c(male_data$`Body weight`, female_data$`Body weight`))
-
-ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = BT.Average)) +
-  geom_boxplot() +
-  labs(x = "Sex Group", y = "BT Average") +
-  ggtitle("Distribution of BT Average by Sex Group")
-
-ggplot(data = boxplot_data_sex, aes(x = Sex_Group, y = Weight)) +
-  geom_boxplot() +
-  labs(x = "Sex Group", y = "Weight") +
-  ggtitle("Distribution of Weight by Sex Group")
 
 ################################ Scatterplot BMI & SST
 
@@ -736,8 +598,10 @@ data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
 ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
   geom_point() +
   labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month") +
-  scale_color_gradient(low = "blue", high = "red") +
+  scale_color_gradient(low = my_colors[8], high = my_colors[2]) +
   theme_minimal()
+
+#----------------------------------
 
 ## Scatterplot with BMI and SST per Month per Country
 # Remove NA's from SST
@@ -751,6 +615,8 @@ ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
   theme_minimal() +
   facet_wrap(~ Country, ncol = 3)
 
+#----------------------------------
+
 ## Create a scatterplot with BMI and SST on the y-axis and Year on the x-axis
 # Remove NA's from SST
 data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
@@ -763,6 +629,8 @@ ggplot(data_merged_clean, aes(x = Year, y = BMI, color = SST)) +
   theme_minimal() +
   facet_wrap(~ Country, ncol = 3)
 
+#----------------------------------
+
 ## Scatterplot BMI and SST per Year
 # Remove NA's from SST
 data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
@@ -774,6 +642,8 @@ ggplot(data_merged_clean, aes(x = Year, y = BMI, color = SST)) +
   scale_color_gradient(low = "blue", high = "red") +
   theme_minimal() +
   facet_wrap(~ met_season, ncol = 4)
+
+#----------------------------------
 
 # Scatterplot with only trauma cases
 # Filter the data for the trauma cases (with interspecific interaction)
@@ -791,6 +661,8 @@ ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
   geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["Year", "Estimate"], 2), "x")), 
             hjust = 1, vjust = 1, size = 4)
 
+#----------------------------------
+
 # Scatterplot with only trauma cases
 # Filter the data for the trauma cases (without interspecific interaction)
 data_merged_trauma <- data_merged_clean %>%
@@ -806,10 +678,6 @@ ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
   theme_minimal() +
   geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["Year", "Estimate"], 2), "x")), 
             hjust = 1, vjust = 1, size = 4)
-
-
-
-
 
 
 #######################################################################

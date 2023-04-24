@@ -1,6 +1,7 @@
 #Libraries
 library(ggplot2)
 library(ggpmisc)
+library(wesanderson) #Colour palette
 
 north_sst <- read_excel("north_sst.xlsx")
 View(north_sst)
@@ -36,6 +37,10 @@ south_sst$met_season <- mapply(get_season, south_sst$month)
 
 # Create a new column "met_season" based on month in north_sst
 north_sst$met_season <- mapply(get_season, north_sst$month)
+
+# Combine the GrandBudapest1 and GrandBudapest2 palettes into a single vector
+my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2", n = 4))
+
 
 #--------------------------------------
 
@@ -80,9 +85,9 @@ ggplot() +
   geom_line(data = south_sst, aes(x = date, y = temp, color = "South")) +
   geom_smooth(data = south_sst, aes(x = date, y = temp, color = "South"), method = "lm", se = FALSE) +
   labs(x = "Date", y = "Sea Surface Temperature (Celsius)", color = "Region") +
-  scale_color_manual(values = c("North" = "#0072B2", "South" = "#D55E00"), 
+  scale_color_manual(values = c("North" = my_colors[8], "South" = my_colors[2]), 
                      labels = c("North", "South")) +
-  theme_minimal() +
+  theme_bw() +
   theme(legend.position = "right", legend.justification = "top", legend.direction = "vertical") +
   facet_wrap(~ met_season, nrow = 2, scales = "free_y") +
   ggtitle("Sea Surface Temperature by Region and Season in the North Sea")
