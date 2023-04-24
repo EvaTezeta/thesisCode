@@ -8,6 +8,8 @@ library(kableExtra)
 library(mgcv) #For GAM models
 library(sjPlot) #For LM tables
 library(ggrepel) #To identify outliers
+library(wesanderson) #Colour palette
+library(cowplot) #For plot grid titles
 
 
 #Merge three datasets together
@@ -22,7 +24,6 @@ data_merged$`Age Group` <- as.factor(data_merged$`Age Group`)
 data_merged$Country <- as.factor(data_merged$Country)
 data_merged$NCC <- as.factor(data_merged$NCC)
 data_merged$`Death category` <- as.factor(data_merged$`Death category`)
-
 
 #Convert month to an ordered factor variable
 data_merged$Month <- factor(data_merged$Month, levels = 1:12, ordered = TRUE)
@@ -84,6 +85,8 @@ data_merged$met_season <- mapply(get_season, data_merged$Day, data_merged$Month)
 data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
 data_merged$BMI <- round(data_merged$BMI, 1)
 
+# Combine the GrandBudapest1 and GrandBudapest2 palettes into a single vector
+my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2", n = 4))
 
 
 ####################################### 
@@ -131,6 +134,19 @@ avg_bmi_country_sex_wide <- pivot_wider(avg_bmi_country_sex, id_cols = Sex, name
 # Display the table using kable
 kable(avg_bmi_country_sex_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per sex and country")
 
+#---------------
+
+## BMI table per sex
+# Calculate the average BMI per Sex
+avg_bmi_sex <- aggregate(BMI ~ Sex, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Sex as columns
+avg_bmi_sex_wide <- pivot_wider(avg_bmi_sex, names_from = Sex, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_sex_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per sex")
+
+
 #----------------------------------
 
 ## BMI table per country
@@ -142,6 +158,18 @@ avg_bmi_country_wide <- pivot_wider(avg_bmi_country, names_from = Country, value
 
 # Display the table using kable
 kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per country")
+
+#-----
+
+## BMI table per Age Class
+# Calculate the average BMI per Country
+avg_bmi_age <- aggregate(BMI ~ `Age Group`, data = data_merged, FUN = mean)
+
+# Reshape the data to a wide format with Country as columns
+avg_bmi_age_wide <- pivot_wider(avg_bmi_age, names_from = `Age Group`, values_from = BMI)
+
+# Display the table using kable
+kable(avg_bmi_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per Age Class")
 
 #-----
 
@@ -165,6 +193,18 @@ avg_bmi_deathcat_wide <- pivot_wider(avg_bmi_deathcat, names_from = Country, val
 # Display the table using kable with Death Category as rows
 kable(avg_bmi_deathcat_wide, digits = 1, row.names = TRUE, format = "markdown", caption = "BMI average per country and death category")
 
+#---------------------------------
+
+##Plot for monthly BMI Average per Age Group
+# Calculate the average BMI for each month, Age Group
+avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_merged, FUN = mean)
+
+# Create a plot for both Age Groups "J" and "A"
+ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
+  geom_line() +
+  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Juvenile", "Adult")) +
+  labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 #----------------------------------
 
@@ -180,6 +220,17 @@ year_table <- data_merged %>%
   mutate(across(everything(), ~ ifelse(. == 0, NA, .))) # replace 0 with NA
 
 kable(year_table, row.names = TRUE, format = "markdown")
+
+#Table by country
+country_table <- data_merged %>%
+  group_by(Country) %>%
+  summarize(n = n()) %>%
+  pivot_wider(names_from = "Country", values_from = "n", values_fill = 0) %>%
+  as.data.frame() %>%
+  `row.names<-`(.[,1]) %>%
+  .[,-1]
+
+kable(country_table, row.names = TRUE, format = "markdown")
 
 #Age table by country
 age_table <- data_merged %>%
@@ -213,6 +264,40 @@ death_table <- data_merged %>%
   .[,-1]
 
 kable(death_table, row.names = TRUE, format = "markdown")
+
+#Months table by country
+month_table <- data_merged %>%
+  group_by(Country, Month) %>%
+  summarize(n = n()) %>%
+  pivot_wider(names_from = "Country", values_from = "n", values_fill = NA) %>%
+  as.data.frame() %>%
+  `row.names<-`(.[,1]) %>%
+  .[,-1]
+
+kable(month_table, row.names = TRUE, format = "markdown")
+
+#Seasons table by country
+season_table <- data_merged %>%
+  group_by(Country, met_season) %>%
+  summarize(n = n()) %>%
+  pivot_wider(names_from = "Country", values_from = "n", values_fill = NA) %>%
+  as.data.frame() %>%
+  `row.names<-`(.[,1]) %>%
+  .[,-1]
+
+kable(season_table, row.names = TRUE, format = "markdown")
+
+#Seasons table
+met_season_table <- data_merged %>%
+  group_by(met_season) %>%
+  summarize(n = n()) %>%
+  pivot_wider(names_from = "met_season", values_from = "n", values_fill = NA) %>%
+  as.data.frame() %>%
+  `row.names<-`(.[,1]) %>%
+  .[,-1]
+
+kable(met_season_table, row.names = TRUE, format = "markdown")
+
 
 #-------------------------------------
 
@@ -257,40 +342,52 @@ kable(BT_table_sex, caption = "BT average per sex and country", format = "markdo
 
 ##Plots for data exploration
 
-#Histogram of year divided by country
+#Histogram of year divided by country - appendix
 ggplot(data_merged, aes(x = Year, fill = Country)) +
   geom_histogram(binwidth = 1, alpha = 0.5, position = "dodge") +
   facet_wrap(~ Country, ncol = 3) +
   labs(x = "Year", y = "Frequency") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c(my_colors)) +
+  ggtitle("Histogram of Year by Country: England, the Netherlands, and Scotland")
+
 
 #Histogram of blubber thickness averages by country
 ggplot(data_merged, aes(x = `BT Average`, fill = Country)) +
   geom_histogram(binwidth = 1, alpha = 0.5, position = "dodge") +
   facet_wrap(~ Country, ncol = 3) +
   labs(x = "Blubber thickness averages (mm)", y = "Frequency") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c(my_colors))
 
-#Bar plot of sex by country
+#Bar plot of sex by country - appendix
 ggplot(data_merged, aes(x = Country, fill = Sex)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Sex") +
   ggtitle("Sex distribution by country") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c(my_colors), labels = c("Female", "Male"))
 
-#Bar plot of age by country
+
+#Bar plot of age by country - appendix
 ggplot(data_merged, aes(x = Country, fill = `Age Group`)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Age Group") +
-  ggtitle("Age group distribution by country") +
-  theme(plot.title = element_text(hjust = 0.5))
+  ggtitle("Age Class distribution by Country") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Age Class", 
+                    labels = c("Adult", "Juvenile", "Neonate"))
 
-#Bar plot of death category by country
+
+#Bar plot of death category by country - appendix
 ggplot(data_merged, aes(x = Country, fill = `Death category`)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Death category") +
-  ggtitle("Death category distribution by country") +
-  theme(plot.title = element_text(hjust = 0.5))
+  ggtitle("Cause of Death frequency by Country") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Cause of Death categories")
 
 #-----
 
@@ -309,7 +406,7 @@ ggplot(avg_blubber, aes(x = Month, y = avg_blubber_thickness, color = Country)) 
   labs(title = "Average Blubber Thickness", 
        x = "Month",
        y = "Average Blubber Thickness (mm)") +
-  scale_color_manual(values = c("red", "blue", "green")) +
+  scale_color_manual(values = c(my_colors)) +
   theme_bw()
 
 # Calculate the average blubber thickness for each month and country
@@ -323,40 +420,49 @@ ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Country, color = 
   scale_y_continuous(limits = c(10, 22.5), breaks = seq(10, 22.5, by = 2))
 
 #----------------------------------
-##Plot for monthly BT Average per sex and country
-#Create list to store the plots
+##Plot for monthly BMI per sex and country
+# Create list to store the plots
 plot_list1 <- list()
-
-# Define color palette
-my_colors <- c("#E69F00", "#56B4E9")
 
 # Create three separate plots, one for each country
 for (i in unique(data_merged$Country)) {
   
-# Subset the data for the current country
-country_data <- subset(data_merged, Country == i)
-
-# Calculate the average blubber thickness for each month, sex, and country
-avg_bt <- aggregate(`BT Average` ~ Month + Sex, data = country_data, FUN = mean)
-
-# Plot the average blubber thickness over time for each sex as a separate line
-p <- ggplot(data = avg_bt, aes(x = Month, y = `BT Average`, group = Sex, color = Sex)) +
-  geom_line() +
-  scale_color_manual(values = my_colors) +
-  labs(x = "Month", y = "Average Blubber Thickness (mm)", title = i) +
-  theme_minimal()
-
-#Add plots to list
-plot_list1[[i]] <- (p)
-
+  # Subset the data for the current country
+  country_data <- subset(data_merged, Country == i)
+  
+  # Calculate the average BMI for each month, sex, and country
+  avg_bmi <- aggregate(BMI ~ Month + Sex, data = country_data, FUN = mean)
+  
+  # Plot the average BMI over time for each sex as a separate line
+  p <- ggplot(data = avg_bmi, aes(x = Month, y = BMI, group = Sex, color = Sex)) +
+    geom_line() +
+    scale_color_manual(values = my_colors, labels = c("Female", "Male")) +
+    labs(x = "Month", y = "Average BMI", title = i) +
+    theme_minimal() 
+  
+  #Add plots to list
+  plot_list1[[i]] <- (p)
+  
 }
 
 #Arrange plots into grid
-grid.arrange(grobs = plot_list1, ncol = 3)
+plot_grid1 <- plot_grid(plotlist = plot_list1, ncol = 3)
+
+# Add title above grid
+title <- ggdraw() +
+  draw_label("Average Monthly BMI per Sex and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
+             y = 0.97, size = 14)
+
+#Arrange title and plot grid together
+plot_final <- plot_grid(title, plot_grid1, ncol = 1, rel_heights = c(0.1, 0.9))
+
+#Print plot
+plot_final
+
 
 #----------------------------------
 
-##Plot for monthly BT Average per age group and country
+##Plot for monthly BMI per age group and country
 #Create list to store the plots
 plot_list2 <- list()
 
@@ -367,15 +473,15 @@ for (i in unique(data_merged$Country)) {
 country_data <- subset(data_merged, Country == i)
 
 # Calculate the average blubber thickness for each month, sex, and country
-avg_bt_age <- aggregate(`BT Average` ~ Month + `Age Group`, data = country_data, FUN = mean)
+avg_bmi_age <- aggregate(BMI ~ Month + `Age Group`, data = country_data, FUN = mean)
 
 # Filter to only include "J" and "A" in Age Group
-avg_bt_age <- subset(avg_bt_age, `Age Group` %in% c("J", "A"))
+avg_bmi_age <- subset(avg_bmi_age, `Age Group` %in% c("J", "A"))
 
 # Create separate plots for each country
-age <- ggplot(data = avg_bt_age, aes(x = Month, y = `BT Average`, group = `Age Group`, color = `Age Group`)) +
+age <- ggplot(data = avg_bmi_age, aes(x = Month, y = BMI, group = `Age Group`, color = `Age Group`)) +
   geom_line() +
-  labs(x = "Month", y = "Average blubber thickness (mm)", title = i) +
+  labs(x = "Month", y = "Average BMI", title = i) +
   scale_color_manual(values = my_colors) +
   theme_bw()
 
@@ -385,7 +491,49 @@ plot_list2[[i]] <- (age)
 
 #Arrange plots into grid
 grid.arrange(grobs = plot_list2, ncol = 3)
+#---
 
+##Plot for monthly BMI per age group and country
+#Create list to store the plots
+plot_list2 <- list()
+
+# Create three separate plots, one for each country
+for (i in unique(data_merged$Country)) {
+  
+  # Subset the data for the current country
+  country_data <- subset(data_merged, Country == i)
+  
+  # Calculate the average blubber thickness for each month, sex, and country
+  avg_bmi_age <- aggregate(BMI ~ Month + `Age Group`, data = country_data, FUN = mean)
+  
+  # Filter to only include "J" and "A" in Age Group
+  avg_bmi_age <- subset(avg_bmi_age, `Age Group` %in% c("J", "A"))
+  
+  # Create separate plots for each country
+  age <- ggplot(data = avg_bmi_age, aes(x = Month, y = BMI, group = `Age Group`, color = `Age Group`)) +
+    geom_line() +
+    labs(x = "Month", y = "Average BMI", title = i) +
+    scale_color_manual(values = my_colors, name = "Age Class", 
+                       labels = c("Juvenile", "Adult")) +
+    theme_bw()
+  
+  #Add plot to plot list
+  plot_list2[[i]] <- (age)
+}
+
+#Arrange plots into grid
+plot_grid2 <- grid.arrange(grobs = plot_list2, ncol = 3)
+
+# Add title above grid
+title2 <- ggdraw() +
+  draw_label("Average Monthly BMI per Age Group and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
+             y = 0.97, size = 14)
+
+#Arrange title and plot grid together
+plot_final2 <- plot_grid(title2, plot_grid2, ncol = 1, rel_heights = c(0.1, 0.9))
+
+#Print plot
+plot_final2
 #----------------------------------------
 ## Plots of BT per death category - all countries
 # Create list to store the plots
