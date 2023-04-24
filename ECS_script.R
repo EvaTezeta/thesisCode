@@ -20,6 +20,8 @@ View(data_merged)
 # Only use Dutch data
 data_nl <- subset(data_merged, Country == "Netherlands")
 
+#-----------------
+
 #T-test to test for differences between BMI and Sex
 t.test(BMI ~ Sex, data = data_nl)
 

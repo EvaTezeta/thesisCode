@@ -8,7 +8,6 @@ View(DataNL)
 
 #Load in vriezer dieren
 Vriezer_dieren_all <- read_excel("Vriezer_dieren_all.xlsx")
-View(Vriezer_dieren_all)
 
 #Remove frozen porpoises
 porpoise_ids <- Vriezer_dieren_all$`frozen_porpoise`
