@@ -7,7 +7,7 @@ library(gridExtra) #For graph grids
 library(kableExtra)
 library(mgcv) #For GAM models
 library(sjPlot) #For LM tables
-library(ggrepel) #To identify outliers
+library(ggrepel) #To identify outliers in plot
 library(wesanderson) #Colour palette
 library(cowplot) #For plot grid titles
 
@@ -90,7 +90,7 @@ my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2
 
 
 ####################################### 
-#### End main program             ####              
+#### End main merging program      ####              
 ####################################### 
 #### Now starts the data exploration
 
@@ -337,6 +337,64 @@ ggplot(data_merged, aes(x = Country, fill = `Death category`)) +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), 
                     name = "Cause of Death categories")
+
+
+# Boxplot of BMI per country
+ggplot(data_merged, aes(x = Country, y = BMI)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "BMI", title = "BMI by Country")
+
+# Boxplot of BMI per country and age class
+data_subset <- subset(data_merged, `Age Group` %in% c("J", "A"))
+
+ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "BMI", title = "BMI by Country and Age Class") +
+  scale_fill_manual(values = c(my_colors), 
+                                     name = "Age Class", 
+                                     labels = c("Adult", "Juvenile"))
+
+# Boxplot of BMI per country and sex
+ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "BMI", title = "BMI by Country and Sex") +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Sex", 
+                    labels = c("Female", "Male"))
+#--- Outlier check
+
+data_subset <- subset(data_merged, `Age Group` %in% c("J", "A"))
+
+p1 <- ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "BMI", title = "BMI by Country and Age Class") +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Age Class", 
+                    labels = c("Adult", "Juvenile"))
+
+outliers1 <- boxplot.stats(data_subset$BMI)$out
+
+p1 <- p1 + geom_text_repel(data = data_subset[data_subset$BMI %in% outliers1, ],
+                         aes(x = Country, y = BMI, label = Idcode),
+                         nudge_x = 0.3, nudge_y = 0.3)
+
+p1
+
+p2 <- ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "BMI", title = "BMI by Country and Sex") +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Sex", 
+                    labels = c("Female", "Male"))
+
+outliers2 <- boxplot.stats(data_merged$BMI)$out
+
+p2 <- p2 + geom_text_repel(data = data_merged[data_merged$BMI %in% outliers2, ],
+                         aes(x = Country, y = BMI, label = Idcode),
+                         nudge_x = 0.3, nudge_y = 0.3)
+
+p2
+
 
 #---------------------------------
 ##### Linegraphs BMI

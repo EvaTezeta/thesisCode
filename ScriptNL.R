@@ -4,7 +4,7 @@ library(dplyr) #Use of pipes
 
 #Load in data
 DataNL <- read_excel("DataNL.xlsx")
-View(DataNL)  
+#View(DataNL)  
 
 #Load in vriezer dieren
 Vriezer_dieren_all <- read_excel("Vriezer_dieren_all.xlsx")
@@ -60,4 +60,4 @@ for (i in 1:nrow(DataNL)) {
 DataNL$`Death category` <- as.factor(DataNL$`Death category`)
 summary(DataNL$`Death category`)
 
-View(DataNL)
+#View(DataNL)

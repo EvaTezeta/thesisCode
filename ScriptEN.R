@@ -4,7 +4,7 @@ library(readxl) #To import Excel files
 
 #Load in data
 DataEN <- read_excel("DataEN.xlsx")
-View(DataEN) 
+#View(DataEN) 
 
 #Define the mapping between Composition code and DCC
 mapping <- c("freshly dead- died on beach (code 2a)" = 1,

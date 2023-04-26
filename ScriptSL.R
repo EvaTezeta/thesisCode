@@ -4,11 +4,11 @@ library(readxl) #To import Excel files
 
 #Import data from Excel to R
 DataSL <- read_excel("DataSL.xlsx")
-View(DataSL)
+#View(DataSL)
 
 #Import frozen porpoises
 frozen_porpoise_smass <- read_excel("frozen_porpoise_smass.xlsx")
-View(frozen_porpoise_smass)
+#View(frozen_porpoise_smass)
 
 #Remove frozen porpoises
 porpoise_ids <- frozen_porpoise_smass$`frozen_porpoise`
@@ -42,7 +42,6 @@ DataSL$`Age Group` <-as.factor(DataSL$`Age Group`)
 #Round op numbers to 2 decimals
 DataSL$`BT Average` <- round(DataSL$`BT Average`, 2)
 
-View(DataSL)
 
 #Change Findings to Death category
 for (i in 1:nrow(DataSL)) {
@@ -67,7 +66,6 @@ for (i in 1:nrow(DataSL)) {
     DataSL$`Death category`[i] <- "Other trauma"
 }
 
-View(DataSL)
 
 #Change to factor - only AFTER reassigning! Otherwise won't work!
 DataSL$`Death category` <- as.factor(DataSL$`Death category`)
