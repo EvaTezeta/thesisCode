@@ -726,7 +726,7 @@ ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
 data_merged_trauma <- data_merged_clean %>%
   filter(`Death category` %in% c("Anthropogenic trauma", "Other trauma"))
 
-# Create plot with BMI and SST per Year and met_season
+# Create plot with BMI and SST per Year
 ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "black") +
@@ -737,6 +737,17 @@ ggplot(data_merged_trauma, aes(x = Year, y = BMI, color = SST)) +
   geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged_trauma)))["Year", "Estimate"], 2), "x")), 
             hjust = 1, vjust = 1, size = 4)
 
+#-----
+# Create plot with BMI and SST per Year
+ggplot(data_merged, aes(x = Year, y = BMI, color = SST)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "Year", y = "BMI and SST (°C)", color = "SST", 
+       title = "Average BMI and SST of Harbour Porpoises per Year (all cases)") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged)))["Year", "Estimate"], 2), "x")), 
+            hjust = 1, vjust = 1, size = 4)
 
 #######################################################################
 #######################################################################
