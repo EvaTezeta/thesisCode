@@ -1,4 +1,5 @@
 library(car)
+library(PMCMRplus) #For post-hoc test
 
 # Test for normality - p < 0.05 = not normally distributed
 shapiro.test(data_merged$BMI) #Not normal
@@ -20,10 +21,17 @@ kruskal.test(data_merged$BMI ~ data_merged$`Death category`, data = data_merged)
 kruskal.test(data_merged$BMI ~ data_merged$SST, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$met_season, data = data_merged) #Sig
 
+# Non-parametric post-hoc test
+pairwise.wilcox.test(data_merged$BMI, data_merged$`Age Group`, p.adj = "bonferroni") # Sig
+pairwise.wilcox.test(data_merged$BMI, data_merged$Sex, p.adj = "bonferroni") # Not sig
+pairwise.wilcox.test(data_merged$BMI, data_merged$Country, p.adj = "bonferroni") # NL & SL sig, EN & NL sig, SL & EN not sig
+pairwise.wilcox.test(data_merged$BMI, data_merged$met_season, p.adj = "bonferroni") # Autumn/Spring not sig, rest sig
+pairwise.wilcox.test(data_merged$BMI, data_merged$`Death category`, p.adj = "bonferroni")
+#-----
 
-
-
-
+#Making the first model with all predictors
+model1 <- lm(BMI ~ `Age Group` + Country + Year + SST + Sex + `BT Average` + `Death category` + met_season + Month, data = data_merged) 
+tab_model(model1, dv.labels = "BMI")
 
 
 

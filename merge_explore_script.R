@@ -970,39 +970,6 @@ p <- ggplot(data_merged, aes(x = `BT Average`, y = `BMI`, color = `Death categor
 outliers <- boxplot.stats(data_merged$`BMI`)$out
 p + geom_text_repel(data = data_merged[data_merged$`BMI` %in% outliers, ], aes(label = Idcode))
 
-#-------
-
-## Linear model BMI ~ SST
-# calculate linear regression model
-model1 <- lm(BMI ~ SST, data = data_merged)
-eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
-
-# plot data with linear regression line and equation
-ggplot(data_merged, aes(x = `SST`, y = `BMI`)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST") +
-  ggtitle("Relationship between BMI and SST") +
-  annotate("text", x = min(data_merged$SST), y = max(data_merged$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
-
-#-----------
-
-# Only use Dutch data
-data_nl <- subset(data_merged, Country == "Netherlands")
-
-## Linear model BMI ~ SST
-# calculate linear regression model
-model1 <- lm(BMI ~ SST, data = data_nl)
-eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
-
-# plot data with linear regression line and equation
-ggplot(data_nl, aes(x = `SST`, y = `BMI`)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST in the Netherlands") +
-  ggtitle("Relationship between BMI and SST in the Netherlands") +
-  annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
-
 #--------
 
 # Only use Dutch data
@@ -1012,7 +979,7 @@ data_nl <- subset(data_merged, Country == "Netherlands")
 # calculate linear regression model
 model1 <- lm(BMI ~ SST, data = data_nl)
 eqn <- paste("y = ", round(coef(model1)[2], 2), "x + ", round(coef(model1)[1], 2), "; R2 = ", round(summary(model1)$r.squared, 2), sep = "")
-
+print(eqn)
 # plot data with linear regression line and equation
 ggplot(data_nl, aes(x = `SST`, y = `BMI`, color = met_season)) + 
   geom_point() + 
@@ -1021,20 +988,49 @@ ggplot(data_nl, aes(x = `SST`, y = `BMI`, color = met_season)) +
   ggtitle("Relationship between BMI and SST in the Netherlands") +
   annotate("text", x = min(data_nl$SST), y = max(data_nl$BMI), label = eqn, size = 4, hjust = 0, vjust = 1)
 
+#-------
 
-#####################################################
+## Linear model BMI ~ SST - color = Season
+# calculate linear regression model
+model4 <- lm(BMI ~ SST, data = data_merged)
+eqn3 <- paste("y = ", round(coef(model4)[2], 2), "x + ", round(coef(model4)[1], 2), "; R2 = ", round(summary(model4)$r.squared, 2), sep = "")
 
-# Create linear model with BMI as response and Age Group as predictor
-model1 <- lm(BMI ~ `Age Group`, data = data_merged)
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `SST`, y = `BMI`, color = met_season)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST") +
+  ggtitle("Relationship between BMI and SST") +
+  annotate("text", x = min(data_merged$SST), y = max(data_merged$BMI), label = eqn3, size = 4, hjust = 0, vjust = 1)
 
-# View summary of model results
-summary(model1)
+#-------
 
-#Making the first model with the variables BMI and Age Group
-model1 <- lm(BMI ~ `Age Group`, data = data_merged) 
-tab_model(model1, dv.labels = "BMI")
+## Linear model BMI ~ SST - color = Year
+# calculate linear regression model
+model5 <- lm(BMI ~ SST, data = data_merged)
+eqn4 <- paste("y = ", round(coef(model5)[2], 2), "x + ", round(coef(model5)[1], 2), "; R2 = ", round(summary(model5)$r.squared, 2), sep = "")
 
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `SST`, y = `BMI`, color = Year)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and SST") +
+  ggtitle("Relationship between BMI and SST") +
+  annotate("text", x = min(data_merged$SST), y = max(data_merged$BMI), label = eqn4, size = 4, hjust = 0, vjust = 1)
 
-kruskal.test(data_merged$`BT Average` ~ data_merged$`Age Group`, data = data_merged) #Sig
+#-------
+
+## Linear model BMI ~ SST - color = Season
+# calculate linear regression model
+model6 <- lm(BMI ~ Year, data = data_merged)
+eqn5 <- paste("y = ", round(coef(model6)[2], 2), "x + ", round(coef(model6)[1], 2), "; R2 = ", round(summary(model6)$r.squared, 2), sep = "")
+
+# plot data with linear regression line and equation
+ggplot(data_merged, aes(x = `Year`, y = `BMI`, color = SST)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "SST", y = "BMI", title = "Relationship between BMI and Year") +
+  ggtitle("Relationship between BMI and Year") +
+  annotate("text", x = min(data_merged$SST), y = max(data_merged$BMI), label = eqn5, size = 4, hjust = 0, vjust = 1)
 
 
