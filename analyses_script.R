@@ -27,6 +27,7 @@ pairwise.wilcox.test(data_merged$BMI, data_merged$Sex, p.adj = "bonferroni") # N
 pairwise.wilcox.test(data_merged$BMI, data_merged$Country, p.adj = "bonferroni") # NL & SL sig, EN & NL sig, SL & EN not sig
 pairwise.wilcox.test(data_merged$BMI, data_merged$met_season, p.adj = "bonferroni") # Autumn/Spring not sig, rest sig
 pairwise.wilcox.test(data_merged$BMI, data_merged$`Death category`, p.adj = "bonferroni")
+
 #-----
 
 #Making the first model with all predictors
