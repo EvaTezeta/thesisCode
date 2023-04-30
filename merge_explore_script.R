@@ -10,7 +10,7 @@ library(sjPlot) #For LM tables
 library(ggrepel) #To identify outliers in plot
 library(wesanderson) #Colour palette
 library(cowplot) #For plot grid titles
-
+library(lubridate) #For date splitting
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -88,9 +88,15 @@ data_merged$BMI <- round(data_merged$BMI, 1)
 # Combine the GrandBudapest1 and GrandBudapest2 palettes into a single vector
 my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2", n = 4))
 
+# Create new column with complete date
+data_merged$Date <- paste(data_merged$Day, data_merged$Month, data_merged$Year, sep = "-")
+
+data_merged$Date <- as.Date(data_merged$Date, format = "%d-%m-%Y")
+
+head(data_merged)
 
 ####################################### 
-#### End main merging program      ####              
+## End main merging and prep program ##              
 ####################################### 
 #### Now starts the data exploration
 
@@ -658,6 +664,130 @@ ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
   labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month") +
   scale_color_gradient(low = my_colors[8], high = my_colors[2]) +
   theme_minimal()
+
+#----
+# Scatterplot of all BMI values per month
+# Create a new column, DayOfYear, to represent the day of the year for each date
+data_merged$DayOfYear <- yday(data_merged$Date)
+
+# Split the data frame into a list of data frames, each containing data for a specific day of the year
+data_by_day <- split(data_merged, data_merged$DayOfYear)
+
+# You now have a list where each item is a data frame for a specific day of the year
+
+# Create scatterplot of BMI by day using ggplot2
+p <- ggplot(data = data_merged, aes(x = DayOfYear, y = BMI)) + 
+  geom_point() + 
+  xlab("Months") + 
+  ylab("BMI") + 
+  ggtitle("BMI by Month")
+
+p + scale_x_continuous(breaks = seq(15, 365, by = 30.5),  # approx. middle of each month
+                       labels = month.abb)  # abbreviated month names
+
+#----
+#Only select data from 2008 and calculate average BMI
+data_merged_2008 <- data_merged[data_merged$Year == 2008, ]
+avg_bmi_2008 <- aggregate(BMI ~ DayOfYear, data = data_merged_2008, FUN = mean, na.rm = TRUE)
+
+#Only select data from 2018 and calculate average BMI
+data_merged_2018 <- data_merged[data_merged$Year == 2018, ]
+avg_bmi_2018 <- aggregate(BMI ~ DayOfYear, data = data_merged_2018, FUN = mean, na.rm = TRUE)
+
+#Plot graph and add smooth lines of BMI from 2008 and 2018
+p <- ggplot(data_merged, aes(x = DayOfYear, y = BMI)) +
+  geom_point() +
+  geom_smooth(data = avg_bmi_2008, aes(x = DayOfYear, y = BMI, color = "2008"), 
+              show.legend = TRUE) +
+  geom_smooth(data = avg_bmi_2018, aes(x = DayOfYear, y = BMI, color = "2018"), 
+              show.legend = TRUE) +
+  scale_x_continuous(breaks = seq(15, 365, by = 30.5), labels = month.abb) +
+  labs(x = "Months", y = "BMI", 
+       title = "BMI by Month with Average BMI of 2008 and 2018", 
+       color = "Year") +
+  theme(legend.position = "right")
+
+print(p)
+
+#---------
+# Only select data with Age Group = "J"
+data_j <- filter(data_merged, `Age Group` == "J")
+
+# Only select data from 2008 and calculate average BMI
+data_j_2008 <- data_j[data_j$Year == 2008, ]
+avg_bmi_j_2008 <- aggregate(BMI ~ DayOfYear, data = data_j_2008, FUN = mean, na.rm = TRUE)
+
+# Only select data from 2018 and calculate average BMI
+data_j_2018 <- data_j[data_j$Year == 2018, ]
+avg_bmi_j_2018 <- aggregate(BMI ~ DayOfYear, data = data_j_2018, FUN = mean, na.rm = TRUE)
+
+# Plot graph and add smooth lines of BMI from 2008 and 2018
+p <- ggplot(data_j, aes(x = DayOfYear, y = BMI)) +
+  geom_point() +
+  geom_smooth(data = avg_bmi_j_2008, aes(x = DayOfYear, y = BMI, color = "2008"), 
+              show.legend = TRUE) +
+  geom_smooth(data = avg_bmi_j_2018, aes(x = DayOfYear, y = BMI, color = "2018"), 
+              show.legend = TRUE) +
+  scale_x_continuous(breaks = seq(15, 365, by = 30.5), labels = month.abb) +
+  labs(x = "Months", y = "BMI", 
+       title = "BMI by Month with Average Juvenile BMI of 2008 and 2018", 
+       color = "Year") +
+  theme(legend.position = "right")
+
+print(p)
+
+
+#--------
+#Only select data from 2009 and calculate average BMI
+data_merged_2009 <- data_merged[data_merged$Year == 2009, ]
+avg_bmi_2009 <- aggregate(BMI ~ DayOfYear, data = data_merged_2009, FUN = mean, na.rm = TRUE)
+
+#Only select data from 2019 and calculate average BMI
+data_merged_2019 <- data_merged[data_merged$Year == 2019, ]
+avg_bmi_2019 <- aggregate(BMI ~ DayOfYear, data = data_merged_2019, FUN = mean, na.rm = TRUE)
+
+#Plot graph and add smooth lines of BMI from 2009 and 2019
+p <- ggplot(data_merged, aes(x = DayOfYear, y = BMI)) +
+  geom_point() +
+  geom_smooth(data = avg_bmi_2009, aes(x = DayOfYear, y = BMI, color = "2009"), 
+              show.legend = TRUE) +
+  geom_smooth(data = avg_bmi_2019, aes(x = DayOfYear, y = BMI, color = "2019"), 
+              show.legend = TRUE) +
+  scale_x_continuous(breaks = seq(15, 365, by = 30.5), labels = month.abb) +
+  labs(x = "Months", y = "BMI", 
+       title = "BMI by Month with Average BMI of 2009 and 2019", 
+       color = "Year") +
+  theme(legend.position = "right")
+
+print(p)
+
+#---------
+# Only select data with Age Group = "J"
+data_j <- filter(data_merged, `Age Group` == "J")
+
+# Only select data from 2009 and calculate average BMI
+data_j_2009 <- data_j[data_j$Year == 2009, ]
+avg_bmi_j_2009 <- aggregate(BMI ~ DayOfYear, data = data_j_2009, FUN = mean, na.rm = TRUE)
+
+# Only select data from 2019 and calculate average BMI
+data_j_2019 <- data_j[data_j$Year == 2019, ]
+avg_bmi_j_2019 <- aggregate(BMI ~ DayOfYear, data = data_j_2019, FUN = mean, na.rm = TRUE)
+
+# Plot graph and add smooth lines of BMI from 2009 and 2019
+p <- ggplot(data_j, aes(x = DayOfYear, y = BMI)) +
+  geom_point() +
+  geom_smooth(data = avg_bmi_j_2009, aes(x = DayOfYear, y = BMI, color = "2009"), 
+              show.legend = TRUE) +
+  geom_smooth(data = avg_bmi_j_2019, aes(x = DayOfYear, y = BMI, color = "2019"), 
+              show.legend = TRUE) +
+  scale_x_continuous(breaks = seq(15, 365, by = 30.5), labels = month.abb) +
+  labs(x = "Months", y = "BMI", 
+       title = "BMI by Month with Average Juvenile BMI of 2009 and 2019", 
+       color = "Year") +
+  theme(legend.position = "right")
+
+print(p)
+
 
 #----------------------------------
 
