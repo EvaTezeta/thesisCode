@@ -3,12 +3,17 @@ library(PMCMRplus) #For post-hoc test
 
 # Test for normality - p < 0.05 = not normally distributed
 shapiro.test(data_merged$BMI) #Not normal
+shapiro.test(dm_clean$corBMI) #Not normal
 
 # Test for homogeneity - p < 0.05 = homogeneity violated
 leveneTest(data_merged$BMI, data_merged$`Age Group`) #Violated
 leveneTest(data_merged$BMI, data_merged$Sex) #Violated
 leveneTest(data_merged$BMI, data_merged$met_season) #Violated
 leveneTest(data_merged$BMI, data_merged$`Death category`) #Violated
+#--
+leveneTest(dm_clean$corBMI, dm_clean$`Age Group`) #Violated
+leveneTest(dm_clean$corBMI, dm_clean$Sex) #Violated
+leveneTest(dm_clean$corBMI, dm_clean$met_season) #Violated
 
 # Non-parametric test for differences
 kruskal.test(data_merged$BMI ~ data_merged$`Age Group`, data = data_merged) #Sig
@@ -20,6 +25,19 @@ kruskal.test(data_merged$BMI ~ data_merged$Sex, data = data_merged) #Not sig
 kruskal.test(data_merged$BMI ~ data_merged$`Death category`, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$SST, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$met_season, data = data_merged) #Sig
+
+# With correct BMI
+kruskal.test(dm_clean$corBMI ~ dm_clean$`Age Group`, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$Sex, data = dm_clean) #Not sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$`BT Average`, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$Month, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$Country, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$Year, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$`Death category`, data = dm_clean) #Sig
+kruskal.test(dm_clean$corBMI ~ dm_clean$met_season, data = dm_clean) #Sig
+
+
+
 
 # Non-parametric post-hoc test
 pairwise.wilcox.test(data_merged$BMI, data_merged$`Age Group`, p.adj = "bonferroni") # Sig

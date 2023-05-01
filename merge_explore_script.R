@@ -90,10 +90,10 @@ my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2
 
 # Create new column with complete date
 data_merged$Date <- paste(data_merged$Day, data_merged$Month, data_merged$Year, sep = "-")
-
 data_merged$Date <- as.Date(data_merged$Date, format = "%d-%m-%Y")
 
-head(data_merged)
+dm_clean <- data_merged[!is.na(data_merged$SST), ]
+dm_clean$corBMI <- residuals(gam(dm_clean$BMI~dm_clean$SST)) #Correct BMI with SST
 
 ####################################### 
 ## End main merging and prep program ##              
@@ -360,6 +360,18 @@ ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
                                      name = "Age Class", 
                                      labels = c("Adult", "Juvenile"))
 
+#--- With corrected BMI
+# Boxplot of BMI per country and age class
+dm_clean_subset <- subset(dm_clean, `Age Group` %in% c("J", "A"))
+
+ggplot(dm_clean_subset, aes(x = Country, y = corBMI, fill = `Age Group`)) +
+  geom_boxplot() +
+  labs(x = "Country", y = "corBMI", title = "corBMI by Country and Age Class") +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Age Class", 
+                    labels = c("Adult", "Juvenile"))
+
+
 # Boxplot of BMI per country and sex
 ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
   geom_boxplot() +
@@ -367,6 +379,8 @@ ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
   scale_fill_manual(values = c(my_colors), 
                     name = "Sex", 
                     labels = c("Female", "Male"))
+
+
 #--- Outlier check
 
 data_subset <- subset(data_merged, `Age Group` %in% c("J", "A"))
@@ -709,6 +723,31 @@ p <- ggplot(data_merged, aes(x = DayOfYear, y = BMI)) +
 
 print(p)
 
+#------ Using corrected BMI
+
+#Only select data from 2008 and calculate average BMI
+dm_clean_2008 <- dm_clean[dm_clean$Year == 2008, ]
+avg_corbmi_2008 <- aggregate(corBMI ~ DayOfYear, data = dm_clean_2008, FUN = mean, na.rm = TRUE)
+
+#Only select data from 2018 and calculate average BMI
+dm_clean_2018 <- dm_clean[dm_clean$Year == 2018, ]
+avg_corbmi_2018 <- aggregate(corBMI ~ DayOfYear, data = dm_clean_2018, FUN = mean, na.rm = TRUE)
+
+#Plot graph and add smooth lines of BMI from 2008 and 2018
+p <- ggplot(dm_clean, aes(x = DayOfYear, y = corBMI)) +
+  geom_point() +
+  geom_smooth(data = avg_corbmi_2008, aes(x = DayOfYear, y = corBMI, color = "2008"), 
+              show.legend = TRUE) +
+  geom_smooth(data = avg_corbmi_2018, aes(x = DayOfYear, y = corBMI, color = "2018"), 
+              show.legend = TRUE) +
+  scale_x_continuous(breaks = seq(15, 365, by = 30.5), labels = month.abb) +
+  labs(x = "Months", y = "corBMI", 
+       title = "corBMI by Month with Average BMI of 2008 and 2018", 
+       color = "Year") +
+  theme(legend.position = "right")
+
+print(p)
+
 #---------
 # Only select data with Age Group = "J"
 data_j <- filter(data_merged, `Age Group` == "J")
@@ -878,6 +917,78 @@ ggplot(data_merged, aes(x = Year, y = BMI, color = SST)) +
   theme_minimal() +
   geom_text(aes(x = max(Year), y = max(BMI), label = paste("y = ", round(coef(summary(lm(BMI ~ Year, data = data_merged)))["(Intercept)", "Estimate"], 2), " + ", round(coef(summary(lm(BMI ~ Year, data = data_merged)))["Year", "Estimate"], 2), "x")), 
             hjust = 1, vjust = 1, size = 4)
+
+#----------
+
+# Calculate proportions per country and CDC
+data_prop <- data_merged %>%
+  group_by(Country, `Death category`) %>%
+  summarize(Freq = n()) %>%
+  mutate(prop = Freq/sum(Freq))
+
+# Make a stacked barplot
+ggplot(data_prop, aes(x = Country, y = prop, fill = `Death category`)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = my_colors) +
+  ylab("Proportion of Death category") +
+  xlab("Country") +
+  ggtitle("Proportional death category per country") +
+  theme(legend.position = "bottom")
+
+#----
+# Calculate the proportion of each death category per year
+data_merged_proportions <- data_merged %>%
+  group_by(Year, `Death category`) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n))
+
+# Create a stacked bar chart
+ggplot(data_merged_proportions, aes(x = Year, y = prop, fill = `Death category`)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(my_colors), name = "Death category") +
+  labs(title = "Proportional distribution of death categories for stranded porpoises",
+       x = "Year",
+       y = "Proportion") +
+  theme_minimal()
+
+#---
+
+# Calculate the proportion of each death category per year and country
+data_merged_proportions <- data_merged %>%
+  group_by(Year, Country, `Death category`) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n))
+
+# Create a stacked bar chart with faceting by country
+ggplot(data_merged_proportions, aes(x = Year, y = prop, fill = `Death category`)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(my_colors), name = "Death category") +
+  labs(title = "Proportional distribution of death categories for stranded porpoises",
+       x = "Year",
+       y = "Proportion") +
+  theme_minimal() +
+  facet_wrap(~ Country, ncol = 3)
+
+#---
+
+# Calculate the proportion of each death category per year and country
+data_merged_proportions <- data_merged %>%
+  group_by(Year, Country, `Death category`) %>%
+  summarise(n = n()) %>%
+  mutate(prop = n/sum(n))
+
+# Create a stacked bar chart with faceting by country
+ggplot(data_merged_proportions, aes(x = Year, y = prop, fill = `Death category`)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(my_colors), name = "Death category") +
+  labs(title = "Proportional distribution of death categories for stranded porpoises",
+       x = "Year",
+       y = "Proportion") +
+  theme_minimal() +
+  facet_wrap(~ Country, ncol = 1, scales = "free")
+
+#----
+
 
 #######################################################################
 #######################################################################
