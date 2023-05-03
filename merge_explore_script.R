@@ -100,7 +100,7 @@ data_merged$Date <- as.Date(data_merged$Date, format = "%d-%m-%Y")
 
 data_merged$corBMI <- residuals(gam(data_merged$BMI~data_merged$SST)) #Correct BMI with SST
 
-#Rename Age Group to Age_group for GAM
+#Rename Age_class to Age_group for GAM
 names(data_merged)[names(data_merged) == "Age Group"] <- "Age_class"
 
 #data_merged$Age_group_numeric <- ifelse(data_merged$Age_class == "A", 1, ifelse(data_merged$Age_class == "J", 2, 3))
@@ -133,15 +133,15 @@ kable(avg_bmi_ncc, digits = 1, row.names = FALSE, format = "markdown", caption =
 
 #----------------------------------
 
-## BMI table per age group and country
-# Calculate the average BMI per Country and Age Group
-avg_bmi_country_age <- aggregate(BMI ~ Country + `Age Group`, data = data_merged, FUN = mean)
+## BMI table per Age_class and country
+# Calculate the average BMI per Country and Age_class
+avg_bmi_country_age <- aggregate(BMI ~ Country + Age_class, data = data_merged, FUN = mean)
 
-# Reshape the data to a wide format with Country as columns and Age Group as rows
-avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age Group`, names_from = Country, values_from = BMI)
+# Reshape the data to a wide format with Country as columns and Age_class as rows
+avg_bmi_country_age_wide <- pivot_wider(avg_bmi_country_age, id_cols = `Age_class`, names_from = Country, values_from = BMI)
 
 # Display the table using kable
-kable(avg_bmi_country_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per age group and country")
+kable(avg_bmi_country_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per Age_class and country")
 
 #----------------------------------
 
@@ -184,10 +184,10 @@ kable(avg_bmi_country_wide, digits = 1, row.names = FALSE, format = "markdown", 
 
 ## BMI table per Age Class
 # Calculate the average BMI per Country
-avg_bmi_age <- aggregate(BMI ~ `Age Group`, data = data_merged, FUN = mean)
+avg_bmi_age <- aggregate(BMI ~ `Age_class`, data = data_merged, FUN = mean)
 
 # Reshape the data to a wide format with Country as columns
-avg_bmi_age_wide <- pivot_wider(avg_bmi_age, names_from = `Age Group`, values_from = BMI)
+avg_bmi_age_wide <- pivot_wider(avg_bmi_age, names_from = `Age_class`, values_from = BMI)
 
 # Display the table using kable
 kable(avg_bmi_age_wide, digits = 1, row.names = FALSE, format = "markdown", caption = "BMI average per Age Class")
@@ -242,7 +242,7 @@ kable(country_table, row.names = TRUE, format = "markdown")
 
 #Age table by country
 age_table <- data_merged %>%
-  group_by(Country, `Age Group`) %>%
+  group_by(Country, `Age_class`) %>%
   summarize(n = n()) %>%
   pivot_wider(names_from = "Country", values_from = "n", values_fill = 0) %>%
   as.data.frame() %>%
@@ -340,9 +340,9 @@ ggplot(data_merged, aes(x = Country, fill = Sex)) +
 
 
 #Bar plot of age by country - appendix
-ggplot(data_merged, aes(x = Country, fill = `Age Group`)) +
+ggplot(data_merged, aes(x = Country, fill = `Age_class`)) +
   geom_bar(position = "dodge") +
-  labs(x = "Country", y = "Count", fill = "Age Group") +
+  labs(x = "Country", y = "Count", fill = "Age_class") +
   ggtitle("Age Class distribution by Country") +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), 
@@ -366,9 +366,9 @@ ggplot(data_merged, aes(x = Country, y = BMI)) +
   labs(x = "Country", y = "BMI", title = "BMI by Country")
 
 # Boxplot of BMI per country and age class
-data_subset <- subset(data_merged, `Age Group` %in% c("J", "A"))
+data_subset <- subset(data_merged, `Age_class` %in% c("J", "A"))
 
-ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
+ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age_class`)) +
   geom_boxplot() +
   labs(x = "Country", y = "BMI", title = "BMI by Country and Age Class") +
   scale_fill_manual(values = c(my_colors), 
@@ -377,9 +377,9 @@ ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
 
 #--- With corrected BMI
 # Boxplot of BMI per country and age class
-dm_clean_subset <- subset(dm_clean, `Age Group` %in% c("J", "A"))
+dm_clean_subset <- subset(dm_clean, `Age_class` %in% c("J", "A"))
 
-ggplot(dm_clean_subset, aes(x = Country, y = corBMI, fill = `Age Group`)) +
+ggplot(dm_clean_subset, aes(x = Country, y = corBMI, fill = `Age_class`)) +
   geom_boxplot() +
   labs(x = "Country", y = "corBMI", title = "corBMI by Country and Age Class") +
   scale_fill_manual(values = c(my_colors), 
@@ -398,9 +398,9 @@ ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
 
 #--- Outlier check
 
-data_subset <- subset(data_merged, `Age Group` %in% c("J", "A"))
+data_subset <- subset(data_merged, `Age_class` %in% c("J", "A"))
 
-p1 <- ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age Group`)) +
+p1 <- ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age_class`)) +
   geom_boxplot() +
   labs(x = "Country", y = "BMI", title = "BMI by Country and Age Class") +
   scale_fill_manual(values = c(my_colors), 
@@ -433,12 +433,12 @@ p2
 
 #---------------------------------
 ##### Linegraphs BMI
-##Plot for monthly BMI Average per Age Group - appendix
-# Calculate the average BMI for each month, Age Group
-avg_bmi <- aggregate(BMI ~ Month + `Age Group`, data = data_merged, FUN = mean)
+##Plot for monthly BMI Average per Age_class - appendix
+# Calculate the average BMI for each month, Age_class
+avg_bmi <- aggregate(BMI ~ Month + `Age_class`, data = data_merged, FUN = mean)
 
-# Create a plot for both Age Groups "J" and "A"
-ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age Group`, color = `Age Group`)) +
+# Create a plot for both Age_classs "J" and "A"
+ggplot(data = subset(avg_bmi, `Age_class` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age_class`, color = `Age_class`)) +
   geom_line() +
   scale_color_manual(values = my_colors, name = "Age Class", labels = c("Juvenile", "Adult")) +
   labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
@@ -447,7 +447,7 @@ ggplot(data = subset(avg_bmi, `Age Group` %in% c("J", "A")), aes(x = Month, y = 
 #---------------------------------
 
 ##Plot for monthly BMI Average per Sex - appendix
-# Calculate the average BMI for each month, Age Group
+# Calculate the average BMI for each month, Age_class
 avg_bmi_sex <- aggregate(BMI ~ Month + Sex, data = data_merged, FUN = mean)
 
 # Create a plot for both Sex "F" and "M"
@@ -466,7 +466,7 @@ avg_bmi <- aggregate(BMI ~ Country + Month, data = data_merged, FUN = mean)
 # create a new data frame with the average BMI per month and country
 # Filter out neonates
 avg_bmi <- data_merged %>%
-  filter(`Age Group` != "N") %>%
+  filter(`Age_class` != "N") %>%
   group_by(Month, Country) %>%
   summarise(avg_bmi = mean(BMI))
 
@@ -523,7 +523,7 @@ plot_final
 
 #----------------------------------
 
-##Plot for monthly BMI per age group and country
+##Plot for monthly BMI per Age_class and country
 #Create list to store the plots
 plot_list2 <- list()
 
@@ -534,13 +534,13 @@ for (i in unique(data_merged$Country)) {
   country_data <- subset(data_merged, Country == i)
   
   # Calculate the average BMI for each month, sex, and country
-  avg_bmi_age <- aggregate(BMI ~ Month + `Age Group`, data = country_data, FUN = mean)
+  avg_bmi_age <- aggregate(BMI ~ Month + `Age_class`, data = country_data, FUN = mean)
   
-  # Filter to only include "J" and "A" in Age Group
-  avg_bmi_age <- subset(avg_bmi_age, `Age Group` %in% c("J", "A"))
+  # Filter to only include "J" and "A" in Age_class
+  avg_bmi_age <- subset(avg_bmi_age, `Age_class` %in% c("J", "A"))
   
   # Create separate plots for each country
-  age <- ggplot(data = avg_bmi_age, aes(x = Month, y = BMI, group = `Age Group`, color = `Age Group`)) +
+  age <- ggplot(data = avg_bmi_age, aes(x = Month, y = BMI, group = `Age_class`, color = `Age_class`)) +
     geom_line() +
     labs(x = "Month", y = "Average BMI", title = i) +
     scale_color_manual(values = my_colors, name = "Age Class", 
@@ -556,7 +556,7 @@ plot_grid2 <- grid.arrange(grobs = plot_list2, ncol = 3)
 
 # Add title above grid
 title2 <- ggdraw() +
-  draw_label("Average Monthly BMI per Age Group and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
+  draw_label("Average Monthly BMI per Age_class and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
              y = 0.97, size = 14)
 
 #Arrange title and plot grid together
@@ -764,8 +764,8 @@ p <- ggplot(dm_clean, aes(x = DayOfYear, y = corBMI)) +
 print(p)
 
 #---------
-# Only select data with Age Group = "J"
-data_j <- filter(data_merged, `Age Group` == "J")
+# Only select data with Age_class = "J"
+data_j <- filter(data_merged, `Age_class` == "J")
 
 # Only select data from 2008 and calculate average BMI
 data_j_2008 <- data_j[data_j$Year == 2008, ]
@@ -816,8 +816,8 @@ p <- ggplot(data_merged, aes(x = DayOfYear, y = BMI)) +
 print(p)
 
 #---------
-# Only select data with Age Group = "J"
-data_j <- filter(data_merged, `Age Group` == "J")
+# Only select data with Age_class = "J"
+data_j <- filter(data_merged, `Age_class` == "J")
 
 # Only select data from 2009 and calculate average BMI
 data_j_2009 <- data_j[data_j$Year == 2009, ]
