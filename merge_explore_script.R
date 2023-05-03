@@ -64,6 +64,9 @@ if (is.na(lat)) {
 }
 }
 
+#Remove NA's from SST
+data_merged <- data_merged[!is.na(data_merged$SST), ]
+
 #Create a function to determine the meteorological season based on day and month
 get_season <- function(day, month) {
   # determine the meteorological season based on day and month
@@ -80,6 +83,8 @@ get_season <- function(day, month) {
 
 #Create a new column "met_season" based on day and month
 data_merged$met_season <- mapply(get_season, data_merged$Day, data_merged$Month)
+#Make it a factor variable
+data_merged$met_season <- as.factor(data_merged$met_season)
 
 # BMI calculations and add new column for BMI
 data_merged$BMI <- data_merged$`Body weight` / (data_merged$`Length` / 100) ^ 2
@@ -92,8 +97,18 @@ my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2
 data_merged$Date <- paste(data_merged$Day, data_merged$Month, data_merged$Year, sep = "-")
 data_merged$Date <- as.Date(data_merged$Date, format = "%d-%m-%Y")
 
-dm_clean <- data_merged[!is.na(data_merged$SST), ]
-dm_clean$corBMI <- residuals(gam(dm_clean$BMI~dm_clean$SST)) #Correct BMI with SST
+
+data_merged$corBMI <- residuals(gam(data_merged$BMI~data_merged$SST)) #Correct BMI with SST
+
+#Rename Age Group to Age_group for GAM
+names(data_merged)[names(data_merged) == "Age Group"] <- "Age_class"
+
+#data_merged$Age_group_numeric <- ifelse(data_merged$Age_class == "A", 1, ifelse(data_merged$Age_class == "J", 2, 3))
+#Dummycode sex (maybe not necessary)
+#data_merged$Sex_num <- ifelse(data_merged$Sex == "F", 0, 1)
+
+data_merged <- data_merged[data_merged$Idcode != "SW2008/84", ]
+
 
 ####################################### 
 ## End main merging and prep program ##              
