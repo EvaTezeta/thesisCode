@@ -13,7 +13,8 @@ shapiro.test(dm_clean$corBMI) #Not normal
 leveneTest(data_merged$BMI, data_merged$`Age Group`) #Violated
 leveneTest(data_merged$BMI, data_merged$Sex) #Violated
 leveneTest(data_merged$BMI, data_merged$met_season) #Violated
-leveneTest(data_merged$BMI, data_merged$`Death category`) #Violated
+leveneTest(data_merged$BMI, data_merged$`Death category`)
+leveneTest(data_merged$BMI, data_merged$Country) #Violated
 #--
 leveneTest(dm_clean$corBMI, dm_clean$`Age Group`) #Violated
 leveneTest(dm_clean$corBMI, dm_clean$Sex) #Violated
@@ -63,6 +64,7 @@ model2 <- lm(BMI ~ Year * SST * factor(met_season), data = data_merged)
 step(model2)
 confint(model2)
 drop1(model2, test = "F")
+summary(model2)
 
 ############################
 
@@ -133,7 +135,7 @@ kable(tabel1) %>%
 
 #-------- Checking model 6 and 7 for VIF (multicollinearity)
 #Computing the VIF and creating a dataframe
-vif <- as.data.frame(VIF(model6))
+vif <- as.data.frame(VIF(model2))
 kable(vif) %>%
   kable_styling(latex_options = c("striped", "hover"), full_width = F)  
 
