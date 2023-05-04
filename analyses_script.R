@@ -53,6 +53,20 @@ pairwise.wilcox.test(data_merged$BMI, data_merged$`Death category`, p.adj = "bon
 ####################################### 
 
 #Making the first model with all predictors
+model1 <- lm(BMI ~ Year + SST + factor(Sex) + factor(met_season), data = data_merged)
+step(model1)
+confint(model1)
+drop1(model1, test = "F")
+
+#Making the second model with Sex removed
+model2 <- lm(BMI ~ Year * SST * factor(met_season), data = data_merged)
+step(model2)
+confint(model2)
+drop1(model2, test = "F")
+
+############################
+
+#Making the first model with all predictors
 model1 <- lm(BMI ~ Age_class + Year + SST + Sex + met_season, data = data_merged) 
 tab_model(model1, dv.labels = "BMI")
 #R2 = 0.340
@@ -135,13 +149,13 @@ kable(vif) %>%
 
 #-------- Constant, finite error variance
 #Making a plot to check for homoscedasticity
-plot(model6,1)
+plot(model2,1)
 plot(model7,1)
 plot(model8,1)
 
 #-------- Normally distributed errors
 #Making a Q-Q plot to check if errors are normally distributed
-plot(model6,2)
+plot(model2,2)
 plot(model7,2)
 plot(model8,2)
 
@@ -196,17 +210,35 @@ plot(dfbetas(model7)[,1],
 ## Start GAM building ##              
 ####################################### 
 
-gm1 <- gam(BMI ~ s(Year) + s(Age_class) + s(Sex) + s(SST) + s(met_season), data = data_merged)
-
+gm1 <- gam(BMI ~ s(Year) + factor(Age_class) + factor(Sex) + s(SST) + factor(met_season), data = data_merged)
+summary(gm1)
 gam.check(gm1)
 
-# check the summary statistics of factor variables
-summary(data_merged$Age_class)
-summary(data_merged$Sex)
-summary(data_merged$met_season)
+gm2 <- gam(BMI ~ s(Year) + factor(Age_class) + s(SST) + factor(met_season), data = data_merged)
+summary(gm2)
 
-# check the structure of the data
-str(data_merged)
+gm3 <- gam(BMI ~ s(Year) + factor(Age_class) + s(SST), data = data_merged)
+summary(gm3)
+
+gm4 <- gam(BMI ~ s(Year) + factor(Age_class) + s(SST) + te(Year, SST), data = data_merged)
+summary(gm4)
+
+gm5 <- gam(BMI ~ factor(Age_class) + te(Year, SST), data = data_merged)
+summary(gm5)
+
+plot(gm5, pages = 1, scale = 0)
+
+ggplot(data.frame(resid = residuals(gm5)), aes(sample = resid)) + 
+  stat_qq() + 
+  geom_abline()
 
 
+# Check for patterns or trends in the residuals
+ggplot(data.frame(y = fitted(gm5),
+                  resid = residuals(gm5)), 
+       aes(x = y, y = resid)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  xlab("Fitted values") +
+  ylab("Residuals")
 

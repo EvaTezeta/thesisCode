@@ -102,11 +102,7 @@ data_merged$corBMI <- residuals(gam(data_merged$BMI~data_merged$SST)) #Correct B
 
 #Rename Age_class to Age_group for GAM
 names(data_merged)[names(data_merged) == "Age Group"] <- "Age_class"
-
-#data_merged$Age_group_numeric <- ifelse(data_merged$Age_class == "A", 1, ifelse(data_merged$Age_class == "J", 2, 3))
-#Dummycode sex (maybe not necessary)
-#data_merged$Sex_num <- ifelse(data_merged$Sex == "F", 0, 1)
-
+#Remove extreme outlier
 data_merged <- data_merged[data_merged$Idcode != "SW2008/84", ]
 
 
@@ -453,7 +449,7 @@ avg_bmi_sex <- aggregate(BMI ~ Month + Sex, data = data_merged, FUN = mean)
 # Create a plot for both Sex "F" and "M"
 ggplot(data = subset(avg_bmi_sex, Sex %in% c("F", "M")), aes(x = Month, y = `BMI`, group = Sex, color = Sex)) +
   geom_line() +
-  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Female", "Male")) +
+  scale_color_manual(values = my_colors, name = "Sex", labels = c("Female", "Male")) +
   labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Female and Male Porpoises") +
   theme_bw()
 
@@ -556,7 +552,7 @@ plot_grid2 <- grid.arrange(grobs = plot_list2, ncol = 3)
 
 # Add title above grid
 title2 <- ggdraw() +
-  draw_label("Average Monthly BMI per Age_class and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
+  draw_label("Average Monthly BMI per Age Class and Country", fontface = "bold", x = 0.5, hjust = 0.5, vjust = 1, 
              y = 0.97, size = 14)
 
 #Arrange title and plot grid together
@@ -846,11 +842,8 @@ print(p)
 #----------------------------------
 
 ## Scatterplot with BMI and SST per Month per Country
-# Remove NA's from SST
-data_merged_clean <- data_merged[!is.na(data_merged$SST), ]
-
 # Create plot with BMI and SST per Month for each country in one grid
-ggplot(data_merged_clean, aes(x = Month, y = BMI, color = SST)) +
+ggplot(data_merged, aes(x = Month, y = BMI, color = SST)) +
   geom_point() +
   labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month per Country") +
   scale_color_gradient(low = "blue", high = "red") +

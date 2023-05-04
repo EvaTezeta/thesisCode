@@ -42,6 +42,7 @@ north_sst$met_season <- mapply(get_season, north_sst$month)
 my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2", n = 4))
 
 
+
 #--------------------------------------
 
 # Create line graph of SST by region and month
