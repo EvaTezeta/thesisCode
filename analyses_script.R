@@ -160,6 +160,7 @@ plot(model8,1)
 plot(model2,2)
 plot(model7,2)
 plot(model8,2)
+plot(model8,2)
 
 #-------- Outliers and high leverage
 #Making a plot to check for outliers
@@ -244,3 +245,10 @@ ggplot(data.frame(y = fitted(gm5),
   xlab("Fitted values") +
   ylab("Residuals")
 
+#----
+
+sstmodel <- lm(SST ~ Year : met_season, data = data_merged) 
+tab_model(sstmodel, dv.labels = "SST")
+
+sstmodel2 <- lm(SST ~ Year, data = data_merged) 
+tab_model(sstmodel2, dv.labels = "SST")

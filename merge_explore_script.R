@@ -11,6 +11,7 @@ library(ggrepel) #To identify outliers in plot
 library(wesanderson) #Colour palette
 library(cowplot) #For plot grid titles
 library(lubridate) #For date splitting
+library(stats)
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)
@@ -330,7 +331,7 @@ ggplot(data_merged, aes(x = `BT Average`, fill = Country)) +
 ggplot(data_merged, aes(x = Country, fill = Sex)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Sex") +
-  ggtitle("Sex distribution by country") +
+  ggtitle("Sex distribution by Country") +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), labels = c("Female", "Male"))
 
@@ -436,7 +437,7 @@ avg_bmi <- aggregate(BMI ~ Month + `Age_class`, data = data_merged, FUN = mean)
 # Create a plot for both Age_classs "J" and "A"
 ggplot(data = subset(avg_bmi, `Age_class` %in% c("J", "A")), aes(x = Month, y = `BMI`, group = `Age_class`, color = `Age_class`)) +
   geom_line() +
-  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Juvenile", "Adult")) +
+  scale_color_manual(values = my_colors, name = "Age Class", labels = c("Adult", "Juvenile")) +
   labs(x = "Month", y = "Average BMI", title = "Average BMI per Month for Juvenile and Adult Porpoises") +
   theme_bw()
 
@@ -845,7 +846,7 @@ print(p)
 # Create plot with BMI and SST per Month for each country in one grid
 ggplot(data_merged, aes(x = Month, y = BMI, color = SST)) +
   geom_point() +
-  labs(x = "Month", y = "BMI and SST (°C)", color = "SST", title = "Average BMI and SST of Harbour Porpoises per Month per Country") +
+  labs(x = "Month", y = "BMI", color = "SST (°C)", title = "BMI and SST of Harbour Porpoises per Month per Country") +
   scale_color_gradient(low = "blue", high = "red") +
   theme_minimal() +
   facet_wrap(~ Country, ncol = 3)
