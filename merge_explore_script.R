@@ -372,17 +372,6 @@ ggplot(data_subset, aes(x = Country, y = BMI, fill = `Age_class`)) +
                                      name = "Age Class", 
                                      labels = c("Adult", "Juvenile"))
 
-#--- With corrected BMI
-# Boxplot of BMI per country and age class
-dm_clean_subset <- subset(dm_clean, `Age_class` %in% c("J", "A"))
-
-ggplot(dm_clean_subset, aes(x = Country, y = corBMI, fill = `Age_class`)) +
-  geom_boxplot() +
-  labs(x = "Country", y = "corBMI", title = "corBMI by Country and Age Class") +
-  scale_fill_manual(values = c(my_colors), 
-                    name = "Age Class", 
-                    labels = c("Adult", "Juvenile"))
-
 
 # Boxplot of BMI per country and sex
 ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
