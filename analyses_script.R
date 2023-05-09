@@ -64,6 +64,26 @@ data_subset$Season_Age <- interaction(data_subset$met_season, data_subset$Age_cl
 # Posthoc Dunn's test
 dunn.test(data_subset$BMI, data_subset$Season_Age, method = "holm")
 
+#---- season/sex
+# With interaction test
+kruskal.test(BMI ~ interaction(met_season,Sex), data = data_subset)
+
+# Create a new variable for the interaction between "met_season" and "Sex"
+data_subset$Season_Sex <- interaction(data_subset$met_season, data_subset$Sex)
+
+# Posthoc Dunn's test
+dunn.test(data_subset$BMI, data_subset$Season_Sex, method = "holm")
+
+#---- country/sex
+# With interaction test
+kruskal.test(BMI ~ interaction(Country,Sex), data = data_subset)
+
+# Create a new variable for the interaction between "met_season" and "Sex"
+data_subset$Country_Sex <- interaction(data_subset$Country, data_subset$Sex)
+
+# Posthoc Dunn's test
+dunn.test(data_subset$BMI, data_subset$Country_Sex, method = "holm")
+
 ######### Correlation test
 model1 <- lm(BMI ~ SST * Year, data = data_merged)
 model2 <- lm(BMI ~ SST * Year * factor(met_season), data = data_merged)
@@ -97,8 +117,8 @@ qqnorm(residuals2)
 qqline(residuals1)
 
 
-cor.test(data_merged$BMI, data_merged$SST)
-cor.test(data_merged$BMI, data_merged$Year)
+cor.test(data_merged$BMI, data_merged$SST, method = "spearman")
+cor.test(data_merged$BMI, data_merged$Year, method = "spearman")
 sstbmi <- lm(data_merged$BMI ~ data_merged$SST)
 summary(sstbmi)
 ####################################### 
@@ -132,6 +152,9 @@ summary(model4)
 sstmodel <- lm(SST ~ Year : met_season, data = data_merged) 
 tab_model(sstmodel, dv.labels = "SST")
 
+yearmodel <- lm(BMI ~ Year, data = data_merged)
+tab_model(yearmodel, dv.labels = "BMI")
+summary(yearmodel)
 ############################
 
 

@@ -468,6 +468,9 @@ ggplot(avg_bmi, aes(x = Month, y = avg_bmi, color = Country, group = Country)) +
 
 #----------------------------------
 ##Plot for monthly BMI per sex and country
+# Set the y-axis limits
+y_limits <- c(14, 21)
+
 # Create list to store the plots
 plot_list1 <- list()
 
@@ -485,7 +488,8 @@ for (i in unique(data_merged$Country)) {
     geom_line() +
     scale_color_manual(values = my_colors, labels = c("Female", "Male")) +
     labs(x = "Month", y = "Average BMI", title = i) +
-    theme_bw() 
+    theme_bw() +
+    scale_y_continuous(limits = y_limits)
   
   #Add plots to list
   plot_list1[[i]] <- (p)
@@ -510,6 +514,9 @@ plot_final
 #----------------------------------
 
 ##Plot for monthly BMI per Age_class and country
+# Set the y-axis limits
+y_limits <- c(14, 22)
+
 #Create list to store the plots
 plot_list2 <- list()
 
@@ -530,8 +537,9 @@ for (i in unique(data_merged$Country)) {
     geom_line() +
     labs(x = "Month", y = "Average BMI", title = i) +
     scale_color_manual(values = my_colors, name = "Age Class", 
-                       labels = c("Juvenile", "Adult")) +
-    theme_bw()
+                       labels = c("Adult", "Juvenile")) +
+    theme_bw() +
+    scale_y_continuous(limits = y_limits)
   
   #Add plot to plot list
   plot_list2[[i]] <- (age)
