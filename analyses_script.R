@@ -33,11 +33,20 @@ kruskal.test(data_merged$BMI ~ data_merged$`Death category`, data = data_merged)
 kruskal.test(data_merged$BMI ~ data_merged$SST, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$met_season, data = data_merged) #Sig
 
+kruskal.test(data_merged$`BT Average` ~ data_merged$`Age_class`, data = data_merged)
 # Non-parametric post-hoc test
 dunn.test(data_merged$BMI,data_merged$Age_class, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$Sex, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$Country, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$met_season, method="bonferroni")
+dunn.test(data_merged$BMI,data_merged$`Death category`, method="bonferroni")
+
+# Load the stats package
+library(stats)
+
+# Perform Tukey's HSD test
+tukey <- TukeyHSD(aov(data_merged$BMI ~ data_merged$`Death category`, data = data_merged))
+tukey
 
 #### Test with interaction terms
 
@@ -90,10 +99,10 @@ model2 <- lm(BMI ~ SST * Year * factor(met_season), data = data_merged)
 
 # compute the residuals of the model and the correlation with Y
 residuals1 <- residuals(model1)
-cor(data_merged$BMI, residuals1)
+cor.test(data_merged$BMI, residuals1)
 
 residuals2 <- residuals(model2)
-cor.test(data_merged$BMI, residuals2)
+cor.test(data_merged$BMI, residuals2, method = 'spearman')
 
 #--- check assumptions
 
