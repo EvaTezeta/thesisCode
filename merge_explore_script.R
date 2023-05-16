@@ -381,6 +381,10 @@ ggplot(data_merged, aes(x = Country, y = BMI, fill = Sex)) +
                     name = "Sex", 
                     labels = c("Female", "Male"))
 
+ggplot(data_merged, aes(y = BMI)) +
+  geom_boxplot() +
+  theme_bw()
+
 
 #--- Outlier check
 

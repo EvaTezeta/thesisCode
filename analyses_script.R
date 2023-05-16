@@ -130,6 +130,8 @@ cor.test(data_merged$BMI, data_merged$SST, method = "spearman")
 cor.test(data_merged$BMI, data_merged$Year, method = "spearman")
 sstbmi <- lm(data_merged$BMI ~ data_merged$SST)
 summary(sstbmi)
+
+
 ####################################### 
 ## Linear models ##              
 ####################################### 
@@ -138,6 +140,8 @@ summary(sstbmi)
 model1 <- lm(BMI ~ Year + SST + factor(Sex) + factor(met_season), data = data_merged)
 step(model1)
 confint(model1)
+
+summary(model1)
 
 #Removed Sex
 model2 <- lm(BMI ~ Year + SST + factor(met_season), data = data_merged)
