@@ -131,6 +131,24 @@ cor.test(data_merged$BMI, data_merged$Year, method = "spearman")
 sstbmi <- lm(data_merged$BMI ~ data_merged$SST)
 summary(sstbmi)
 
+# Create a contingency table between the variables season and another variable (e.g., BMI)
+cont_table1 <- table(data_merged$met_season, data_merged$BMI)
+
+# Perform the chi-square test of independence
+chi_square1 <- chisq.test(cont_table1)
+
+# Print the results
+chi_square1
+
+# Create a contingency table between the variables season and another variable (e.g., BMI)
+cont_table2 <- table(data_merged$Sex, data_merged$BMI)
+
+# Perform the chi-square test of independence
+chi_square2 <- chisq.test(cont_table2)
+
+# Print the results
+chi_square2
+
 
 ####################################### 
 ## Linear models ##              
@@ -168,6 +186,45 @@ tab_model(sstmodel, dv.labels = "SST")
 yearmodel <- lm(BMI ~ Year, data = data_merged)
 tab_model(yearmodel, dv.labels = "BMI")
 summary(yearmodel)
+
+##################################
+trauma1 <- lm(BMI ~ SST * Sex + Year, data = data_merged_trauma)
+step(trauma1)
+summary(trauma1)
+
+trauma2 <- lm(BMI ~ SST * Sex * Year, data = data_merged_trauma)
+step(trauma2)
+summary(trauma2)
+
+trauma3 <- lm(BMI ~ SST * Year, data = data_merged_trauma)
+step(trauma3)
+summary(trauma3)
+
+trauma4 <- lm(BMI ~ SST : Year + SST, data = data_merged_trauma)
+step(trauma4)
+summary(trauma4)
+
+trauma5 <- lm(BMI ~ Year + SST, data = data_merged_trauma)
+step(trauma5)
+summary(trauma5)
+
+###### Plots
+
+plot(BMI~SST, data = data_merged_trauma)
+
+plot(residuals(trauma4) ~ Year, data = data_merged_trauma)
+
+plot(residuals(trauma4) ~ Year, data = data_merged_trauma)
+lines(lowess(data_merged_trauma$Year, residuals(trauma4)), col = "red")
+
+boxplot(residuals(trauma4) ~ Age_class, data = data_merged_trauma)
+
+boxplot(residuals(trauma4) ~ Sex, data = data_merged_trauma)
+
+boxplot(residuals(trauma4) ~ met_season, data = data_merged_trauma)
+
+
+
 ############################
 
 

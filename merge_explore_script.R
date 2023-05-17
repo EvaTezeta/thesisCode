@@ -884,7 +884,7 @@ ggplot(data_merged_clean, aes(x = Year, y = BMI, color = SST)) +
 
 # Scatterplot with only trauma cases
 # Filter the data for the trauma cases (with interspecific interaction)
-data_merged_trauma <- data_merged_clean %>%
+data_merged_trauma <- data_merged %>%
   filter(`Death category` %in% c("Anthropogenic trauma", "Other trauma", "Interspecific interaction"))
 
 # Create plot with BMI and SST per Year and met_season
