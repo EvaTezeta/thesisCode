@@ -6,6 +6,12 @@ library(Metrics) #For the MSE
 library(regclass) #For the VIF
 library(dunn.test)
 library(FSA) #Used for dunn test
+library(maps)
+
+
+#################################
+##### Data analyses program #####
+#################################
 
 # Test for normality - p < 0.05 = not normally distributed
 shapiro.test(data_merged$BMI) #Not normal
@@ -274,4 +280,8 @@ plot(sstmodel,2)
 #Making a plot to check for outliers
 plot(rstudent(model2))
 plot(rstudent(sstmodel))
+
+##############
+
+
 
