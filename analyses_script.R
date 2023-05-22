@@ -283,5 +283,49 @@ plot(rstudent(sstmodel))
 
 ##############
 
+# Create a custom polygon for the North Sea region
+northsea_polygon <- data.frame(
+  lon = c(2, 8, 8, 2),
+  lat = c(53, 53, 58, 58)
+)
+
+# Create the base map with the North Sea region
+base_map <- ggplot() +
+  geom_polygon(data = map_data("world"), aes(x = long, y = lat, group = group), fill = "lightgray", color = "black") +
+  geom_polygon(data = northsea_polygon, aes(x = lon, y = lat), fill = "transparent") +
+  coord_cartesian(xlim = c(-4.5, 7), ylim = c(51, 61)) +
+  scale_x_continuous(labels = function(x) paste0(x, "°E")) +
+  scale_y_continuous(labels = function(y) paste0(y, "°N")) +
+  labs(x = "Longitude", y = "Latitude")
+
+print(base_map)
+
+# Overlay locations and their names
+locations <- data.frame(
+  lon = c(5.1783, -0.16016, -4.28994),
+  lat = c(52.08273, 51.52653, 55.872589),
+  name = c("UU", "CSIP", "SMASS")
+)
+
+map_locations <- base_map +
+  geom_point(data = locations, aes(x = lon, y = lat), color = "blue", size = 3) +
+  geom_text(data = locations, aes(x = lon, y = lat, label = name), vjust = 2, hjust = -0.01)
+
+print(map_locations)
+
+# Add your data points on top of the base map
+map_strandings <- base_map +
+  geom_point(data = data_merged, aes(x = `WGS84-Lon`, y = `WGS84-Lat`), color = "red", size = 1.5) +
+  labs(x = "Longitude", y = "Latitude")
+
+print(map_strandings)
+
+
+# 52.082730 5.178300 - UU
+# 51.526530 -0.160160 - CSIP
+# 55.872589 -4.289940 - SMASS
+
+
+
 
 
