@@ -29,6 +29,8 @@ leveneTest(dm_clean$corBMI, dm_clean$Sex) #Violated
 leveneTest(dm_clean$corBMI, dm_clean$met_season) #Violated
 
 # Non-parametric test for differences
+kruskal.test(data_merged$Length ~ data_merged$Country, data = data_merged)
+kruskal.test(data_merged$`Body weight` ~ data_merged$Country, data = data_merged)
 kruskal.test(data_merged$BMI ~ data_merged$`Age_class`, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$`BT Average`, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$Month, data = data_merged) #Sig
@@ -41,6 +43,8 @@ kruskal.test(data_merged$BMI ~ data_merged$met_season, data = data_merged) #Sig
 
 kruskal.test(data_merged$`BT Average` ~ data_merged$`Age_class`, data = data_merged)
 # Non-parametric post-hoc test
+dunn.test(data_merged$Length, data_merged$Country, method="bonferroni")
+dunn.test(data_merged$`Body weight`, data_merged$Country, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$Age_class, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$Sex, method="bonferroni")
 dunn.test(data_merged$BMI,data_merged$Country, method="bonferroni")

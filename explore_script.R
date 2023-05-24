@@ -32,6 +32,13 @@ avg_bmi_ncc$BMI <- round(avg_bmi_ncc$BMI, 1)
 # Display the table using kable
 kable(avg_bmi_ncc, digits = 1, row.names = FALSE, format = "markdown", caption = "NCC vs BMI")
 
+
+data_england <- subset(data_merged, Country == "England")
+data_scotland <- subset(data_merged, Country == "Scotland")
+summary(data_netherlands$BMI)
+summary(data_england$BMI)
+summary(data_scotland$BMI)
+summary(data_merged$BMI)
 #----------------------------------
 
 ## BMI table per Age_class and country
