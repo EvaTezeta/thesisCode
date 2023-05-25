@@ -23,10 +23,7 @@ leveneTest(data_merged$BMI, data_merged$Sex) #Violated
 leveneTest(data_merged$BMI, data_merged$met_season) #Violated
 leveneTest(data_merged$BMI, data_merged$`Death category`)
 leveneTest(data_merged$BMI, data_merged$Country) #Violated
-#--
-leveneTest(dm_clean$corBMI, dm_clean$`Age Group`) #Violated
-leveneTest(dm_clean$corBMI, dm_clean$Sex) #Violated
-leveneTest(dm_clean$corBMI, dm_clean$met_season) #Violated
+
 
 # Non-parametric test for differences
 kruskal.test(data_merged$Length ~ data_merged$Country, data = data_merged)
@@ -42,6 +39,8 @@ kruskal.test(data_merged$BMI ~ data_merged$SST, data = data_merged) #Sig
 kruskal.test(data_merged$BMI ~ data_merged$met_season, data = data_merged) #Sig
 
 kruskal.test(data_merged$`BT Average` ~ data_merged$`Age_class`, data = data_merged)
+kruskal.test(data_merged$BMI ~ data_merged$region, data = data_merged)
+
 # Non-parametric post-hoc test
 dunn.test(data_merged$Length, data_merged$Country, method="bonferroni")
 dunn.test(data_merged$`Body weight`, data_merged$Country, method="bonferroni")
@@ -102,6 +101,16 @@ data_subset$Country_Sex <- interaction(data_subset$Country, data_subset$Sex)
 
 # Posthoc Dunn's test
 dunn.test(data_subset$BMI, data_subset$Country_Sex, method = "holm")
+
+#---- region/age_class
+# With interaction test
+kruskal.test(BMI ~ interaction(region,Age_class), data = data_subset)
+
+# Create a new variable for the interaction between "region" and "Age_class"
+data_subset$region_Age <- interaction(data_subset$region, data_subset$Age_class)
+
+# Posthoc Dunn's test
+dunn.test(data_subset$BMI, data_subset$region_Age, method = "holm")
 
 ######### Correlation test
 model1 <- lm(BMI ~ SST * Year, data = data_merged)
@@ -172,7 +181,7 @@ confint(model1)
 summary(model1)
 
 #Removed Sex
-model2 <- lm(BMI ~ Year + SST + factor(met_season), data = data_merged)
+model2 <- lm(BMI ~ Year + SST + factor(met_season) + factor(region), data = data_merged)
 step(model2)
 confint(model2)
 summary(model2)
@@ -193,12 +202,20 @@ summary(model4)
 sstmodel <- lm(SST ~ Year : met_season, data = data_merged) 
 tab_model(sstmodel, dv.labels = "SST")
 
+sstmodel <- lm(SST ~ Year : met_season + region, data = data_merged) 
+summary(sstmodel)
+tab_model(sstmodel, dv.labels = "SST")
+
 yearmodel <- lm(BMI ~ Year, data = data_merged)
 tab_model(yearmodel, dv.labels = "BMI")
 summary(yearmodel)
 
 ##################################
-trauma1 <- lm(BMI ~ SST * Sex + Year, data = data_merged_trauma)
+# Filter the data for the trauma cases (with interspecific interaction)
+data_merged_trauma <- data_merged %>%
+  filter(`Death category` %in% c("Anthropogenic trauma", "Other trauma", "Interspecific interaction"))
+
+trauma1 <- lm(BMI ~ SST * Sex + Year + region, data = data_merged_trauma)
 step(trauma1)
 summary(trauma1)
 
@@ -214,9 +231,17 @@ trauma4 <- lm(BMI ~ SST : Year + SST, data = data_merged_trauma)
 step(trauma4)
 summary(trauma4)
 
-trauma5 <- lm(BMI ~ Year + SST, data = data_merged_trauma)
+trauma5 <- lm(BMI ~ Year + SST + region, data = data_merged_trauma)
 step(trauma5)
 summary(trauma5)
+
+#-----
+
+model_residuals <- residuals(trauma4)
+
+boxplot(model_residuals ~ data_merged_trauma$Country, 
+        xlab = "Country", ylab = "Residuals",
+        main = "Residuals Distribution by Stranding Location")
 
 ###### Plots
 
@@ -304,6 +329,9 @@ base_map <- ggplot() +
 
 print(base_map)
 
+region_map <- base_map + geom_hline(yintercept = 55, color = "blue", linetype = "dashed")
+print(region_map)
+
 # Overlay locations and their names
 locations <- data.frame(
   lon = c(5.1783, -0.16016, -4.28994),
@@ -318,7 +346,7 @@ map_locations <- base_map +
 print(map_locations)
 
 # Add your data points on top of the base map
-map_strandings <- base_map +
+map_strandings <- region_map +
   geom_point(data = data_merged, aes(x = `WGS84-Lon`, y = `WGS84-Lat`), color = "red", size = 1.5) +
   labs(x = "Longitude", y = "Latitude")
 

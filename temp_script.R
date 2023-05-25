@@ -41,8 +41,12 @@ north_sst$met_season <- mapply(get_season, north_sst$month)
 # Combine the GrandBudapest1 and GrandBudapest2 palettes into a single vector
 my_colors <- c(wes_palette("GrandBudapest1", n = 4), wes_palette("GrandBudapest2", n = 4))
 
+#-------------------
+sstmodel_south <- lm(temp ~ year : met_season, data = south_sst) 
+summary(sstmodel_south)
 
-
+sstmodel_north <- lm(temp ~ year : met_season, data = north_sst) 
+summary(sstmodel_north)
 #--------------------------------------
 
 # Create line graph of SST by region and month

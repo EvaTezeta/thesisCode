@@ -95,3 +95,7 @@ data_merged$corBMI <- residuals(gam(data_merged$BMI~data_merged$SST)) #Correct B
 names(data_merged)[names(data_merged) == "Age Group"] <- "Age_class"
 #Remove extreme outlier
 data_merged <- data_merged[data_merged$Idcode != "SW2008/84", ]
+
+# Check if latitude is greater than or equal to 55 degrees and create new variable
+data_merged$region <- ifelse(data_merged$`WGS84-Lat` >= 55, "north", "south")
+

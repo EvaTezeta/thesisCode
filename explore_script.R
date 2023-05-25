@@ -39,6 +39,15 @@ summary(data_netherlands$BMI)
 summary(data_england$BMI)
 summary(data_scotland$BMI)
 summary(data_merged$BMI)
+
+summary(data_merged_trauma$BMI)
+data_netherlands_trauma <- subset(data_merged_trauma, Country == "Netherlands")
+data_england_trauma <- subset(data_merged_trauma, Country == "England")
+data_scotland_trauma <- subset(data_merged_trauma, Country == "Scotland")
+
+summary(data_netherlands_trauma$BMI)
+summary(data_england_trauma$BMI)
+summary(data_scotland_trauma$BMI)
 #----------------------------------
 
 ## BMI table per Age_class and country
@@ -759,6 +768,16 @@ print(p)
 ggplot(data_merged, aes(x = Month, y = BMI, color = SST)) +
   geom_point() +
   labs(x = "Month", y = "BMI", color = "SST (°C)", title = "BMI and SST of Harbour Porpoises per Month per Country") +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  facet_wrap(~ Country, ncol = 3)
+
+#----------------------------------
+## Scatterplot with BMI and SST per Month per Country
+# Create plot with BMI and SST per Month for each country in one grid
+ggplot(data_merged_trauma, aes(x = Month, y = BMI, color = SST)) +
+  geom_point() +
+  labs(x = "Month", y = "BMI", color = "SST (°C)", title = "BMI and SST of Harbour Porpoises per Month per Country - Acute Cases Only") +
   scale_color_gradient(low = "blue", high = "red") +
   theme_minimal() +
   facet_wrap(~ Country, ncol = 3)
