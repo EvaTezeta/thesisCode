@@ -2,6 +2,7 @@
 ####################################### 
 ## Main merging and prep program ##              
 ####################################### 
+library(gam)
 
 #Merge three datasets together
 data_merged <- rbind(DataNL, DataSL, DataEN)

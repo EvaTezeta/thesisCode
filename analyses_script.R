@@ -146,6 +146,7 @@ qqline(residuals1)
 
 
 cor.test(data_merged$BMI, data_merged$SST, method = "spearman")
+cor.test(data_merged_trauma$BMI, data_merged_trauma$SST, method = "spearman")
 cor.test(data_merged$BMI, data_merged$Year, method = "spearman")
 sstbmi <- lm(data_merged$BMI ~ data_merged$SST)
 summary(sstbmi)

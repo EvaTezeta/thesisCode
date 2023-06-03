@@ -306,6 +306,23 @@ ggplot(data_merged, aes(y = BMI)) +
   theme_bw()
 
 
+# Boxplot of BMI per season and age class
+data_subset <- subset(data_merged, `Age_class` %in% c("J", "A"))
+
+ggplot(data_subset, aes(x = met_season, y = BMI, fill = `Age_class`)) +
+  geom_boxplot() +
+  labs(x = "Season", y = "BMI", title = "BMI by Season and Age Class") +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Age Class", 
+                    labels = c("Adult", "Juvenile"))
+
+ggplot(data_merged, aes(x = met_season, y = BMI)) +
+  geom_boxplot() +
+  labs(x = "Season", y = "BMI", title = "BMI by Season") +
+  scale_fill_manual(values = c(my_colors)) +
+  theme_bw()
+
+
 #--- Outlier check
 
 data_subset <- subset(data_merged, `Age_class` %in% c("J", "A"))
