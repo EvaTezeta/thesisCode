@@ -188,7 +188,7 @@ confint(model2)
 summary(model2)
 
 #With Year*SST interaction
-model3 <- lm(BMI ~ Year : SST + factor(met_season), data = data_merged)
+model3 <- lm(BMI ~ Year : SST + SST, data = data_merged)
 step(model3)
 confint(model3)
 summary(model3)
@@ -333,6 +333,20 @@ print(base_map)
 region_map <- base_map + geom_hline(yintercept = 55, color = "blue", linetype = "dashed")
 print(region_map)
 
+# Overlay SST locations and their names
+sstlocations <- data.frame(
+  lon = c(1.30000, 3.00000),
+  lat = c(57.00000, 53.30000),
+  name = c("North", "South")
+)
+
+# Add the SST locations to the region map
+region_map <- base_map + geom_hline(yintercept = 55, color = "blue", linetype = "dashed") +
+  geom_point(data = sstlocations, aes(x = lon, y = lat), color = "black", size = 3) +
+  geom_text(data = sstlocations, aes(x = lon, y = lat, label = name), vjust = -1)
+
+print(region_map)
+
 # Overlay locations and their names
 locations <- data.frame(
   lon = c(5.1783, -0.16016, -4.28994),
@@ -352,6 +366,7 @@ map_strandings <- region_map +
   labs(x = "Longitude", y = "Latitude")
 
 print(map_strandings)
+
 
 
 # 52.082730 5.178300 - UU
