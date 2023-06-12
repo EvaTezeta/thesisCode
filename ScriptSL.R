@@ -84,3 +84,4 @@ DataSL <- DataSL %>%
   filter(!(Region == "Highland" & 
              (`WGS84-Lon` < -4.40)))
 
+

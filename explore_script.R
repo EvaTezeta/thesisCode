@@ -255,12 +255,29 @@ ggplot(data_merged, aes(x = Country, fill = Sex)) +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), labels = c("Female", "Male"))
 
+# Bar plot by season with custom colors for each bar
+ggplot(data_merged, aes(x = met_season)) +
+  geom_bar(position = "dodge", fill = my_colors[1:length(unique(data_merged$met_season))]) +
+  labs(x = "Season", y = "Count") +
+  ggtitle("Distribution by Season") +
+  theme_bw()
+
 
 #Bar plot of age by country - appendix
 ggplot(data_merged, aes(x = Country, fill = `Age_class`)) +
   geom_bar(position = "dodge") +
   labs(x = "Country", y = "Count", fill = "Age_class") +
   ggtitle("Age Class distribution by Country") +
+  theme_bw() +
+  scale_fill_manual(values = c(my_colors), 
+                    name = "Age Class", 
+                    labels = c("Adult", "Juvenile", "Neonate"))
+
+#Bar plot of age by season
+ggplot(data_merged, aes(x = met_season, fill = `Age_class`)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Season", y = "Count", fill = "Age Class") +
+  ggtitle("Age Class distribution by Season") +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), 
                     name = "Age Class", 
@@ -275,6 +292,9 @@ ggplot(data_merged, aes(x = Country, fill = `Death category`)) +
   theme_bw() +
   scale_fill_manual(values = c(my_colors), 
                     name = "Cause of Death categories")
+
+
+
 
 
 # Boxplot of BMI per country
