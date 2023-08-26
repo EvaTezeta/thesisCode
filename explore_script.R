@@ -394,7 +394,7 @@ ggplot(data = subset(avg_bmi, `Age_class` %in% c("J", "A")), aes(x = Month, y = 
 #---------------------------------
 
 ##Plot for monthly BMI Average per Sex - appendix
-# Calculate the average BMI for each month, Age_class
+# Calculate the average BMI for each month, Sex
 avg_bmi_sex <- aggregate(BMI ~ Month + Sex, data = data_merged, FUN = mean)
 
 # Create a plot for both Sex "F" and "M"
