@@ -18,6 +18,7 @@ kable(stranded_counts_wide,
       format = "markdown",
       caption = "Number of stranded porpoises per Month and country") %>%
   kable_styling(bootstrap_options = "striped")
+
 ############
 
 # Calculate the average BT for each Month, Sex, and Region
@@ -120,6 +121,73 @@ ggplot(data_merged, aes(x = Month, y = `BT Average`, color = SST)) +
   scale_color_gradient(low = "blue", high = "red") +
   theme_minimal() +
   facet_wrap(~ region, ncol = 2)
+
+################# MAF prelim graph
+# Create new column with complete date
+DataNL$Date <- paste(DataNL$Day, DataNL$Month, DataNL$Year, sep = "-")
+DataNL$Date <- as.Date(DataNL$Date, format = "%d-%m-%Y")
+
+# Create a new column, DayOfYear, to represent the day of the year for each date
+DataNL$DayOfYear <- yday(DataNL$Date)
+
+# Split the data frame into a list of data frames, each containing data for a specific day of the year
+data_by_day <- split(DataNL, DataNL$DayOfYear)
+
+# Remove Neonates from dataset for graph
+DataNL_subset <- subset(DataNL, `Age Group` %in% c("J", "A"))
+
+# Create a scatterplot with regression lines and confidence intervals
+scatter_plot <- ggplot(DataNL_subset, aes(x = DayOfYear, y = `BT Average`, color = `Age Group`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, formula = y ~ x, aes(group = `Age Group`), linetype = 2) +
+  labs(x = "Day of Year", y = "BT Average", color = "Age Class") +
+  scale_color_manual(values = c("A" = "blue", "J" = "red")) +
+  theme_minimal()
+
+# Display the scatterplot
+print(scatter_plot)
+
+##
+# Create a scatterplot with smoother lines for each group using geom_smooth
+scatter_plot <- ggplot(DataNL_subset, aes(x = DayOfYear, y = `BT Average`, color = `Age Group`)) +
+  geom_point() +
+  geom_smooth(method = "loess", aes(group = `Age Group`), linetype = 1) +
+  labs(x = "Day of Year", y = "Average Blubber Thickness", color = "Age Class") +
+  scale_color_manual(values = c("A" = "#1F77B4", "J" = "#FF7F0E"),
+                     labels = c("Adult", "Juvenile")) +  # Custom legend labels
+  ggtitle("Blubber Thickness Trend by Age Group") +  # Add title
+  theme_minimal()
+
+# Display the scatterplot
+print(scatter_plot)
+
+##
+# Create a scatterplot with smoother lines for each group using geom_smooth
+scatter_plot <- ggplot(DataNL_subset, aes(x = DayOfYear, y = `BT Average`, color = Sex)) +
+  geom_point() +
+  geom_smooth(method = "loess", aes(group = Sex), linetype = 1) +
+  labs(x = "Day of Year", y = "Average Blubber Thickness", color = "Sex") +
+  scale_color_manual(values = c("F" = "#1F77B4", "M" = "#FF7F0E"),
+                     labels = c("Female", "Male")) +  # Custom legend labels
+  ggtitle("Blubber Thickness Trend by Sex") +  # Add title
+  theme_minimal()
+
+# Display the scatterplot
+print(scatter_plot)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #################
 cor.test(data_merged$`BT Average`, data_merged$SST, method = "spearman")
