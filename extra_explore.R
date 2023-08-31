@@ -169,7 +169,7 @@ scatter_plot <- ggplot(DataNL_subset, aes(x = DayOfYear, y = `BT Average`, color
   labs(x = "Day of Year", y = "Average Blubber Thickness", color = "Sex") +
   scale_color_manual(values = c("F" = "#1F77B4", "M" = "#FF7F0E"),
                      labels = c("Female", "Male")) +  # Custom legend labels
-  ggtitle("Blubber Thickness Trend by Sex") +  # Add title
+  ggtitle("Blubber Thickness Trend by Sex (N=364)") +  # Add title
   theme_minimal()
 
 # Display the scatterplot
